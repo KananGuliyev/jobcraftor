@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply min-h-screen bg-hero-mesh font-body text-sand antialiased;
+}
+
+::selection {
+  @apply bg-sunrise/30 text-white;
+}
+
+.panel-surface {
+  @apply rounded-[28px] border border-white/10 bg-panel/80 shadow-soft backdrop-blur-xl;
+}
+
+.premium-card {
+  @apply rounded-[28px] border border-white/10 bg-white/[0.045] shadow-soft backdrop-blur-xl;
+}
+
+.landing-shell {
+  @apply relative mx-auto flex max-w-[1380px] flex-col gap-20 px-4 py-8 sm:px-6 sm:py-10 xl:px-8;
+}
+
+.section-block {
+  @apply grid gap-6;
+}
+
+.section-copy {
+  @apply text-sm text-mist/70;
+}
+
+.field-area {
+  @apply min-h-[220px] w-full rounded-[22px] border border-white/10 bg-ink/80 px-5 py-4 text-[15px] leading-7 text-sand outline-none transition focus:border-sunrise/80 focus:ring-4 focus:ring-sunrise/10;
+}
+
+.field-input {
+  @apply w-full rounded-[18px] border border-white/10 bg-ink/80 px-4 py-3 text-[15px] text-sand outline-none transition focus:border-sunrise/80 focus:ring-4 focus:ring-sunrise/10;
+}
+
+.token {
+  @apply rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-sand;
+}
+
+.button-primary {
+  @apply inline-flex items-center justify-center rounded-full bg-gradient-to-r from-sunrise to-ember px-5 py-3 text-sm font-semibold text-slate-900 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(246,165,79,0.22)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sunrise/20;
+}
+
+.button-secondary {
+  @apply inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-sand transition duration-200 hover:-translate-y-0.5 hover:border-sky/30 hover:bg-sky/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/15;
+}
