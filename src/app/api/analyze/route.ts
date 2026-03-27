@@ -6,6 +6,9 @@ import {
   jobCraftorAnalysisResponseSchema,
 } from "@/types/jobcraftor";
 
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
 function getValidationMessage(error: ZodError) {
   return error.issues[0]?.message ?? "Please review the input fields and try again.";
 }

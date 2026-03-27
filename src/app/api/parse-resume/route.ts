@@ -3,6 +3,7 @@ import { parseResumeSuccessSchema } from "@/types/jobcraftor";
 import { parseResumeFile, ResumeParseError } from "@/lib/services/resume-parser";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
