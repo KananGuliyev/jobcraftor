@@ -1,3 +1,11 @@
+import {
+  canUseBrowserStorage,
+  clearStoredJson,
+  createLocalRecordId,
+  readStoredJson,
+  writeStoredJson,
+} from "./jobcraftor-browser-storage";
+
 export type JobCraftorTelemetryEventType =
   | "generate_plan_clicked"
   | "analysis_failed"
@@ -14,16 +22,12 @@ export interface JobCraftorTelemetryEvent {
 const STORAGE_KEY = "jobcraftor.telemetry.v1";
 const MAX_EVENTS = 20;
 
-function canUseStorage() {
-  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
-}
-
 export function loadJobCraftorTelemetry() {
-  if (!canUseStorage()) {
+  if (!canUseBrowserStorage()) {
     return [] as JobCraftorTelemetryEvent[];
   }
 
-  const raw = window.localStorage.getItem(STORAGE_KEY);
+  const raw = readStoredJson(STORAGE_KEY);
 
   if (!raw) {
     return [] as JobCraftorTelemetryEvent[];
@@ -38,27 +42,27 @@ export function loadJobCraftorTelemetry() {
 }
 
 export function trackJobCraftorEvent(type: JobCraftorTelemetryEventType, detail: string) {
-  if (!canUseStorage()) {
+  if (!canUseBrowserStorage()) {
     return [] as JobCraftorTelemetryEvent[];
   }
 
   const nextEvent: JobCraftorTelemetryEvent = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    id: createLocalRecordId(),
     timestamp: new Date().toISOString(),
     type,
     detail,
   };
 
   const nextEvents = [nextEvent, ...loadJobCraftorTelemetry()].slice(0, MAX_EVENTS);
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextEvents));
+  writeStoredJson(STORAGE_KEY, nextEvents);
 
   return nextEvents;
 }
 
 export function clearJobCraftorTelemetry() {
-  if (!canUseStorage()) {
+  if (!canUseBrowserStorage()) {
     return;
   }
 
-  window.localStorage.removeItem(STORAGE_KEY);
+  clearStoredJson(STORAGE_KEY);
 }

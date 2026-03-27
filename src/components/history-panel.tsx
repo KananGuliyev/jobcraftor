@@ -1,6 +1,7 @@
 "use client";
 
 import type { JobCraftorHistoryEntry } from "@/types/jobcraftor";
+import { CollectionPanel, CollectionPanelEmptyState } from "./collection-panel";
 
 interface HistoryPanelProps {
   entries: JobCraftorHistoryEntry[];
@@ -29,33 +30,18 @@ function sourceLabel(source: JobCraftorHistoryEntry["meta"]["source"]) {
 
 export function HistoryPanel({ entries, onOpen, onClear }: HistoryPanelProps) {
   return (
-    <section className="premium-card p-5 sm:p-6">
-      <div className="flex flex-col gap-4 border-b border-white/10 pb-5 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-3">
-          <p className="eyebrow-label">Saved history</p>
-          <h2 className="font-display text-[2rem] font-semibold tracking-[-0.02em] text-sand">
-            Revisit recent analyses
-          </h2>
-          <p className="section-subtitle max-w-2xl">
-            JobCraftor saves recent dashboards in this browser so you can reopen them quickly during a live demo or
-            compare a few applications without signing in.
-          </p>
-        </div>
-        {entries.length > 0 ? (
-          <button type="button" onClick={onClear} className="button-secondary self-start">
-            Clear history
-          </button>
-        ) : null}
-      </div>
-
+    <CollectionPanel
+      eyebrow="Saved history"
+      title="Revisit recent analyses"
+      description="JobCraftor saves recent dashboards in this browser so you can reopen them quickly during a live demo or compare a few applications without signing in."
+      clearLabel={entries.length > 0 ? "Clear history" : undefined}
+      onClear={entries.length > 0 ? onClear : undefined}
+    >
       {entries.length === 0 ? (
-        <div className="mt-6 surface-subtle p-5">
-          <p className="font-display text-xl font-semibold text-sand">No saved analyses yet</p>
-          <p className="mt-2 text-sm leading-7 text-mist/68">
-            Generate a plan or launch the instant demo, and JobCraftor will keep the latest dashboards here for quick
-            revisit.
-          </p>
-        </div>
+        <CollectionPanelEmptyState
+          title="No saved analyses yet"
+          description="Generate a plan or launch the instant demo, and JobCraftor will keep the latest dashboards here for quick revisit."
+        />
       ) : (
         <div className="mt-6 grid gap-4">
           {entries.map((entry) => (
@@ -97,6 +83,6 @@ export function HistoryPanel({ entries, onOpen, onClear }: HistoryPanelProps) {
           ))}
         </div>
       )}
-    </section>
+    </CollectionPanel>
   );
 }

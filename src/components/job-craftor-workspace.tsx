@@ -2,22 +2,36 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { demoHighlights, demoInput, demoMeta, demoResult } from "@/data/demo-content";
-import { clearJobCraftorHistory, loadJobCraftorHistory, saveJobCraftorHistoryEntry } from "@/lib/jobcraftor-history";
-import { normalizeResumeText } from "@/lib/resume-text";
 import {
-  clearJobCraftorTelemetry,
-  loadJobCraftorTelemetry,
-  trackJobCraftorEvent,
+  clearJobCraftorDebugEvents,
+  clearJobCraftorSavedHistory,
+  loadJobCraftorLocalPersistence,
+  recordJobCraftorLocalEvent,
+  saveJobCraftorLocalAnalysis,
   type JobCraftorTelemetryEvent,
-} from "@/lib/jobcraftor-telemetry";
+} from "@/lib/jobcraftor-local-persistence";
+import {
+  buildAnalyzePayload,
+  buildParsedResumeUploadState,
+  buildSampleUploadState,
+  buildSavedAnalysisUploadState,
+  buildWorkspaceFormValues,
+  defaultWorkspaceUploadState,
+  emptyWorkspaceFormValues,
+  getWorkspaceFieldErrors,
+  isSupportedResumeUpload,
+  unsupportedResumeFileError,
+  type WorkspaceFieldErrors,
+  type WorkspaceFormField,
+  type WorkspaceFormValues,
+  type WorkspaceUploadState,
+} from "@/lib/jobcraftor-workspace";
 import type {
-  AnalyzeJobCraftorInput,
   JobCraftorAnalysisMeta,
   JobCraftorAnalysisResponse,
   JobCraftorHistoryEntry,
   JobCraftorResult,
   ParseResumeSuccess,
-  ResumeUploadFormat,
 } from "@/types/jobcraftor";
 import { AppHeader } from "./app-header";
 import { DiagnosticsPanel } from "./diagnostics-panel";
@@ -28,80 +42,10 @@ import { ResultsEmptyState } from "./results-empty-state";
 import { ResultsExperience } from "./results-experience";
 import { SectionHeading } from "./section-heading";
 
-type FormField = "jobPostingText" | "jobPostingUrl" | "resumeText" | "targetRole" | "deadline";
-
-interface FormValues {
-  jobPostingText: string;
-  jobPostingUrl: string;
-  resumeText: string;
-  targetRole: string;
-  deadline: string;
-}
-
-interface UploadState {
-  fileName: string | null;
-  format: ResumeUploadFormat | null;
-  sourceLabel: string | null;
-  helperText: string;
-}
-
-interface FieldErrors {
-  jobPostingText?: string;
-  jobPostingUrl?: string;
-  resumeText?: string;
-  targetRole?: string;
-  deadline?: string;
-}
-
-const emptyForm: FormValues = {
-  jobPostingText: "",
-  jobPostingUrl: "",
-  resumeText: "",
-  targetRole: "",
-  deadline: "",
-};
-
-const defaultUploadState: UploadState = {
-  fileName: null,
-  format: null,
-  sourceLabel: null,
-  helperText: "No file uploaded yet.",
-};
-
-const unsupportedFileError =
-  "Upload a `.txt`, `.md`, `.rtf`, `.pdf`, or `.docx` resume file, or paste the resume directly into the field.";
-
-function isValidUrl(value: string) {
-  try {
-    new URL(value);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function getFieldErrors(values: FormValues, uploadState: UploadState): FieldErrors {
-  const errors: FieldErrors = {};
-
-  if (!values.jobPostingText.trim() && !values.jobPostingUrl.trim()) {
-    errors.jobPostingText = "Paste the job description or provide a job URL so JobCraftor has a role to analyze.";
-  }
-
-  if (values.jobPostingUrl.trim() && !isValidUrl(values.jobPostingUrl.trim())) {
-    errors.jobPostingUrl = "Enter a valid URL, including the `https://` prefix.";
-  }
-
-  if (!values.resumeText.trim() && !uploadState.fileName) {
-    errors.resumeText = "Paste your resume text or upload a supported file so JobCraftor has evidence to compare.";
-  }
-
-  return errors;
-}
-
 export function JobCraftorWorkspace() {
-  const [formValues, setFormValues] = useState<FormValues>(emptyForm);
-  const [uploadState, setUploadState] = useState<UploadState>(defaultUploadState);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [formValues, setFormValues] = useState<WorkspaceFormValues>(emptyWorkspaceFormValues);
+  const [uploadState, setUploadState] = useState<WorkspaceUploadState>(defaultWorkspaceUploadState);
+  const [fieldErrors, setFieldErrors] = useState<WorkspaceFieldErrors>({});
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [result, setResult] = useState<JobCraftorResult | null>(null);
   const [analysisMeta, setAnalysisMeta] = useState<JobCraftorAnalysisMeta | null>(null);
@@ -113,8 +57,9 @@ export function JobCraftorWorkspace() {
   const [activeView, setActiveView] = useState<"workspace" | "results">("workspace");
 
   useEffect(() => {
-    setHistoryEntries(loadJobCraftorHistory());
-    setTelemetryEvents(loadJobCraftorTelemetry());
+    const localState = loadJobCraftorLocalPersistence();
+    setHistoryEntries(localState.historyEntries);
+    setTelemetryEvents(localState.telemetryEvents);
   }, []);
 
   const completion = Math.round(
@@ -127,50 +72,29 @@ export function JobCraftorWorkspace() {
       100,
   );
 
-  function updateField(field: FormField, value: string) {
+  function updateField(field: WorkspaceFormField, value: string) {
     setFormValues((current) => ({ ...current, [field]: value }));
     setFieldErrors((current) => ({ ...current, [field]: undefined }));
     setSubmissionError(null);
   }
 
   function handleLoadDemo() {
-    setFormValues({
-      jobPostingText: demoInput.jobPostingText ?? "",
-      jobPostingUrl: demoInput.jobPostingUrl ?? "",
-      resumeText: demoInput.resumeText,
-      targetRole: demoInput.targetRole ?? "",
-      deadline: demoInput.deadline ?? "",
-    });
-    setUploadState({
-      fileName: demoInput.resumeFileName ?? null,
-      format: "txt",
-      sourceLabel: "Sample dataset",
-      helperText: "Sample software engineering internship content has been loaded for the contest demo.",
-    });
+    setFormValues(buildWorkspaceFormValues(demoInput));
+    setUploadState(
+      buildSampleUploadState(
+        demoInput.resumeFileName ?? null,
+        "Sample dataset",
+        "Sample software engineering internship content has been loaded for the contest demo.",
+      ),
+    );
     setFieldErrors({});
     setSubmissionError(null);
     setAnalysisMeta(null);
   }
 
   function hydrateAnalysisFromHistory(entry: JobCraftorHistoryEntry) {
-    setFormValues({
-      jobPostingText: entry.input.jobPostingText ?? "",
-      jobPostingUrl: entry.input.jobPostingUrl ?? "",
-      resumeText: entry.input.resumeText,
-      targetRole: entry.input.targetRole ?? "",
-      deadline: entry.input.deadline ?? "",
-    });
-    setUploadState({
-      fileName: entry.input.resumeFileName ?? null,
-      format: entry.input.resumeFileName ? "txt" : null,
-      sourceLabel: "Saved analysis",
-      helperText: `Saved locally on ${new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      }).format(new Date(entry.createdAt))}.`,
-    });
+    setFormValues(buildWorkspaceFormValues(entry.input));
+    setUploadState(buildSavedAnalysisUploadState(entry));
     setFieldErrors({});
     setSubmissionError(null);
     setResult(entry.result);
@@ -182,37 +106,23 @@ export function JobCraftorWorkspace() {
   }
 
   function launchInstantDemo() {
-    const nextInput: AnalyzeJobCraftorInput = {
-      jobPostingText: demoInput.jobPostingText ?? "",
-      jobPostingUrl: demoInput.jobPostingUrl ?? "",
-      resumeText: demoInput.resumeText,
-      resumeFileName: demoInput.resumeFileName ?? null,
-      targetRole: demoInput.targetRole ?? "",
-      deadline: demoInput.deadline ?? "",
-    };
-
-    setFormValues({
-      jobPostingText: nextInput.jobPostingText ?? "",
-      jobPostingUrl: nextInput.jobPostingUrl ?? "",
-      resumeText: nextInput.resumeText,
-      targetRole: nextInput.targetRole ?? "",
-      deadline: nextInput.deadline ?? "",
-    });
-    setUploadState({
-      fileName: nextInput.resumeFileName ?? null,
-      format: "txt",
-      sourceLabel: "Instant demo dataset",
-      helperText: "This sample software engineering internship package is ready to explore immediately.",
-    });
+    setFormValues(buildWorkspaceFormValues(demoInput));
+    setUploadState(
+      buildSampleUploadState(
+        demoInput.resumeFileName ?? null,
+        "Instant demo dataset",
+        "This sample software engineering internship package is ready to explore immediately.",
+      ),
+    );
     setFieldErrors({});
     setSubmissionError(null);
     setResult(demoResult);
     setAnalysisMeta(demoMeta);
     setIsGenerating(false);
     setIsUploading(false);
-    setHistoryEntries(saveJobCraftorHistoryEntry(nextInput, demoResult, demoMeta));
+    setHistoryEntries(saveJobCraftorLocalAnalysis(demoInput, demoResult, demoMeta));
     setTelemetryEvents(
-      trackJobCraftorEvent(
+      recordJobCraftorLocalEvent(
         "demo_mode_used",
         `Instant demo opened for ${demoResult.roleTitle} at ${demoResult.companyHint}.`,
       ),
@@ -222,8 +132,8 @@ export function JobCraftorWorkspace() {
   }
 
   function handleReset() {
-    setFormValues(emptyForm);
-    setUploadState(defaultUploadState);
+    setFormValues(emptyWorkspaceFormValues);
+    setUploadState(defaultWorkspaceUploadState);
     setResult(null);
     setAnalysisMeta(null);
     setFieldErrors({});
@@ -234,13 +144,13 @@ export function JobCraftorWorkspace() {
 
   async function handleAnalyze() {
     setTelemetryEvents(
-      trackJobCraftorEvent(
+      recordJobCraftorLocalEvent(
         "generate_plan_clicked",
         `Generate Plan clicked with ${formValues.jobPostingText.trim() ? "job text" : "job URL"} and ${formValues.resumeText.trim() ? "resume text" : "resume upload"}.`,
       ),
     );
 
-    const nextErrors = getFieldErrors(formValues, uploadState);
+    const nextErrors = getWorkspaceFieldErrors(formValues, uploadState);
 
     if (Object.keys(nextErrors).length > 0) {
       setFieldErrors(nextErrors);
@@ -248,14 +158,7 @@ export function JobCraftorWorkspace() {
       return;
     }
 
-    const payload: AnalyzeJobCraftorInput = {
-      jobPostingText: formValues.jobPostingText.trim(),
-      jobPostingUrl: formValues.jobPostingUrl.trim(),
-      resumeText: normalizeResumeText(formValues.resumeText),
-      resumeFileName: uploadState.fileName,
-      targetRole: formValues.targetRole.trim(),
-      deadline: formValues.deadline.trim(),
-    };
+    const payload = buildAnalyzePayload(formValues, uploadState);
 
     setFieldErrors({});
     setSubmissionError(null);
@@ -280,7 +183,7 @@ export function JobCraftorWorkspace() {
         throw new Error(body.error ?? "JobCraftor could not generate a result.");
       }
 
-      setHistoryEntries(saveJobCraftorHistoryEntry(payload, body.result, body.meta));
+      setHistoryEntries(saveJobCraftorLocalAnalysis(payload, body.result, body.meta));
 
       startTransition(() => {
         setResult(body.result ?? null);
@@ -288,7 +191,7 @@ export function JobCraftorWorkspace() {
       });
     } catch (caughtError) {
       const message = caughtError instanceof Error ? caughtError.message : "Something went wrong while analyzing the role.";
-      setTelemetryEvents(trackJobCraftorEvent("analysis_failed", message));
+      setTelemetryEvents(recordJobCraftorLocalEvent("analysis_failed", message));
       setSubmissionError(message);
     } finally {
       setIsGenerating(false);
@@ -296,12 +199,9 @@ export function JobCraftorWorkspace() {
   }
 
   async function handleUpload(file: File) {
-    const fallbackExtension = file.name.toLowerCase().split(".").pop() ?? "";
-    const supported = ["txt", "md", "rtf", "pdf", "docx", "doc"].includes(fallbackExtension);
-
-    if (!supported) {
-      setTelemetryEvents(trackJobCraftorEvent("parsing_failed", unsupportedFileError));
-      setSubmissionError(unsupportedFileError);
+    if (!isSupportedResumeUpload(file.name)) {
+      setTelemetryEvents(recordJobCraftorLocalEvent("parsing_failed", unsupportedResumeFileError));
+      setSubmissionError(unsupportedResumeFileError);
       setFieldErrors((current) => ({
         ...current,
         resumeText: "Use a supported resume file or paste your resume directly.",
@@ -332,17 +232,12 @@ export function JobCraftorWorkspace() {
         ...current,
         resumeText: body.text ?? current.resumeText,
       }));
-      setUploadState({
-        fileName: body.meta.fileName,
-        format: body.meta.format,
-        sourceLabel: body.meta.sourceLabel,
-        helperText: body.meta.helperText,
-      });
+      setUploadState(buildParsedResumeUploadState(body.meta));
       setFieldErrors((current) => ({ ...current, resumeText: undefined }));
       setSubmissionError(null);
     } catch (caughtError) {
       const message = caughtError instanceof Error ? caughtError.message : "JobCraftor could not parse that resume file.";
-      setTelemetryEvents(trackJobCraftorEvent("parsing_failed", message));
+      setTelemetryEvents(recordJobCraftorLocalEvent("parsing_failed", message));
       setSubmissionError(message);
       setFieldErrors((current) => ({
         ...current,
@@ -369,12 +264,12 @@ export function JobCraftorWorkspace() {
   }
 
   function handleClearHistory() {
-    clearJobCraftorHistory();
+    clearJobCraftorSavedHistory();
     setHistoryEntries([]);
   }
 
   function handleClearTelemetry() {
-    clearJobCraftorTelemetry();
+    clearJobCraftorDebugEvents();
     setTelemetryEvents([]);
   }
 

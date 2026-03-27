@@ -27,10 +27,6 @@ body {
   @apply pointer-events-none absolute rounded-full blur-3xl;
 }
 
-.panel-surface {
-  @apply rounded-[28px] border border-white/10 bg-panel/85 shadow-soft backdrop-blur-xl;
-}
-
 .premium-card {
   @apply rounded-[28px] border border-white/10 bg-white/[0.04] shadow-soft backdrop-blur-xl transition duration-200;
 }
@@ -53,11 +49,6 @@ body {
 
 .section-block {
   @apply grid gap-8;
-}
-
-.section-copy {
-  @apply text-sm leading-7;
-  color: rgb(220 230 242 / 0.68);
 }
 
 .eyebrow-label {
@@ -107,10 +98,6 @@ body {
 .field-input-error:focus {
   border-color: rgb(255 131 95 / 0.6);
   box-shadow: 0 0 0 4px rgb(255 131 95 / 0.15);
-}
-
-.token {
-  @apply rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-sm text-sand;
 }
 
 .button-primary {
@@ -199,8 +186,7 @@ body {
 
   .premium-card,
   .surface-subtle,
-  .surface-muted,
-  .panel-surface {
+  .surface-muted {
     border-color: #d8dee7 !important;
     background: #ffffff !important;
     box-shadow: none !important;

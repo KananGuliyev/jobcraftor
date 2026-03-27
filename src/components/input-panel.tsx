@@ -1,37 +1,21 @@
 "use client";
 
 import { useId, useState, type DragEvent } from "react";
-import type { ResumeUploadFormat } from "@/types/jobcraftor";
-
-interface UploadState {
-  fileName: string | null;
-  format: ResumeUploadFormat | null;
-  sourceLabel: string | null;
-  helperText: string;
-}
-
-interface FieldErrors {
-  jobPostingText?: string;
-  jobPostingUrl?: string;
-  resumeText?: string;
-  targetRole?: string;
-  deadline?: string;
-}
+import type {
+  WorkspaceFieldErrors,
+  WorkspaceFormField,
+  WorkspaceFormValues,
+  WorkspaceUploadState,
+} from "@/lib/jobcraftor-workspace";
 
 interface InputPanelProps {
-  values: {
-    jobPostingText: string;
-    jobPostingUrl: string;
-    resumeText: string;
-    targetRole: string;
-    deadline: string;
-  };
-  uploadState: UploadState;
+  values: WorkspaceFormValues;
+  uploadState: WorkspaceUploadState;
   isLoading: boolean;
   isUploading: boolean;
   submissionError: string | null;
-  fieldErrors: FieldErrors;
-  onChange: (field: "jobPostingText" | "jobPostingUrl" | "resumeText" | "targetRole" | "deadline", value: string) => void;
+  fieldErrors: WorkspaceFieldErrors;
+  onChange: (field: WorkspaceFormField, value: string) => void;
   onAnalyze: () => void;
   onLoadDemo: () => void;
   onReset: () => void;

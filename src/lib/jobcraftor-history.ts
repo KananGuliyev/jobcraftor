@@ -5,13 +5,16 @@ import type {
   JobCraftorResult,
 } from "@/types/jobcraftor";
 import { jobCraftorHistorySchema } from "@/types/jobcraftor";
+import {
+  canUseBrowserStorage,
+  clearStoredJson,
+  createLocalRecordId,
+  readStoredJson,
+  writeStoredJson,
+} from "./jobcraftor-browser-storage";
 
 const STORAGE_KEY = "jobcraftor.history.v1";
 const MAX_HISTORY_ITEMS = 6;
-
-function canUseStorage() {
-  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
-}
 
 function buildFingerprint(input: AnalyzeJobCraftorInput, result: JobCraftorResult) {
   return JSON.stringify({
@@ -26,11 +29,11 @@ function buildFingerprint(input: AnalyzeJobCraftorInput, result: JobCraftorResul
 }
 
 export function loadJobCraftorHistory() {
-  if (!canUseStorage()) {
+  if (!canUseBrowserStorage()) {
     return [];
   }
 
-  const raw = window.localStorage.getItem(STORAGE_KEY);
+  const raw = readStoredJson(STORAGE_KEY);
 
   if (!raw) {
     return [];
@@ -47,11 +50,11 @@ export function loadJobCraftorHistory() {
 }
 
 function writeHistory(entries: JobCraftorHistoryEntry[]) {
-  if (!canUseStorage()) {
+  if (!canUseBrowserStorage()) {
     return;
   }
 
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  writeStoredJson(STORAGE_KEY, entries);
 }
 
 export function saveJobCraftorHistoryEntry(
@@ -59,12 +62,12 @@ export function saveJobCraftorHistoryEntry(
   result: JobCraftorResult,
   meta: JobCraftorAnalysisMeta,
 ) {
-  if (!canUseStorage()) {
+  if (!canUseBrowserStorage()) {
     return [];
   }
 
   const nextEntry: JobCraftorHistoryEntry = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    id: createLocalRecordId(),
     createdAt: new Date().toISOString(),
     input,
     result,
@@ -84,9 +87,9 @@ export function saveJobCraftorHistoryEntry(
 }
 
 export function clearJobCraftorHistory() {
-  if (!canUseStorage()) {
+  if (!canUseBrowserStorage()) {
     return;
   }
 
-  window.localStorage.removeItem(STORAGE_KEY);
+  clearStoredJson(STORAGE_KEY);
 }
