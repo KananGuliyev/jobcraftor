@@ -4,6 +4,12 @@ import { useEffect, useState, useTransition } from "react";
 import { demoHighlights, demoInput, demoMeta, demoResult } from "@/data/demo-content";
 import { clearJobCraftorHistory, loadJobCraftorHistory, saveJobCraftorHistoryEntry } from "@/lib/jobcraftor-history";
 import { normalizeResumeText } from "@/lib/resume-text";
+import {
+  clearJobCraftorTelemetry,
+  loadJobCraftorTelemetry,
+  trackJobCraftorEvent,
+  type JobCraftorTelemetryEvent,
+} from "@/lib/jobcraftor-telemetry";
 import type {
   AnalyzeJobCraftorInput,
   JobCraftorAnalysisMeta,
@@ -14,6 +20,7 @@ import type {
   ResumeUploadFormat,
 } from "@/types/jobcraftor";
 import { AppHeader } from "./app-header";
+import { DiagnosticsPanel } from "./diagnostics-panel";
 import { HistoryPanel } from "./history-panel";
 import { Hero } from "./hero";
 import { InputPanel } from "./input-panel";
@@ -99,6 +106,7 @@ export function JobCraftorWorkspace() {
   const [result, setResult] = useState<JobCraftorResult | null>(null);
   const [analysisMeta, setAnalysisMeta] = useState<JobCraftorAnalysisMeta | null>(null);
   const [historyEntries, setHistoryEntries] = useState<JobCraftorHistoryEntry[]>([]);
+  const [telemetryEvents, setTelemetryEvents] = useState<JobCraftorTelemetryEvent[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -106,6 +114,7 @@ export function JobCraftorWorkspace() {
 
   useEffect(() => {
     setHistoryEntries(loadJobCraftorHistory());
+    setTelemetryEvents(loadJobCraftorTelemetry());
   }, []);
 
   const completion = Math.round(
@@ -202,6 +211,12 @@ export function JobCraftorWorkspace() {
     setIsGenerating(false);
     setIsUploading(false);
     setHistoryEntries(saveJobCraftorHistoryEntry(nextInput, demoResult, demoMeta));
+    setTelemetryEvents(
+      trackJobCraftorEvent(
+        "demo_mode_used",
+        `Instant demo opened for ${demoResult.roleTitle} at ${demoResult.companyHint}.`,
+      ),
+    );
     setActiveView("results");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -218,6 +233,13 @@ export function JobCraftorWorkspace() {
   }
 
   async function handleAnalyze() {
+    setTelemetryEvents(
+      trackJobCraftorEvent(
+        "generate_plan_clicked",
+        `Generate Plan clicked with ${formValues.jobPostingText.trim() ? "job text" : "job URL"} and ${formValues.resumeText.trim() ? "resume text" : "resume upload"}.`,
+      ),
+    );
+
     const nextErrors = getFieldErrors(formValues, uploadState);
 
     if (Object.keys(nextErrors).length > 0) {
@@ -266,6 +288,7 @@ export function JobCraftorWorkspace() {
       });
     } catch (caughtError) {
       const message = caughtError instanceof Error ? caughtError.message : "Something went wrong while analyzing the role.";
+      setTelemetryEvents(trackJobCraftorEvent("analysis_failed", message));
       setSubmissionError(message);
     } finally {
       setIsGenerating(false);
@@ -277,6 +300,7 @@ export function JobCraftorWorkspace() {
     const supported = ["txt", "md", "rtf", "pdf", "docx", "doc"].includes(fallbackExtension);
 
     if (!supported) {
+      setTelemetryEvents(trackJobCraftorEvent("parsing_failed", unsupportedFileError));
       setSubmissionError(unsupportedFileError);
       setFieldErrors((current) => ({
         ...current,
@@ -318,6 +342,7 @@ export function JobCraftorWorkspace() {
       setSubmissionError(null);
     } catch (caughtError) {
       const message = caughtError instanceof Error ? caughtError.message : "JobCraftor could not parse that resume file.";
+      setTelemetryEvents(trackJobCraftorEvent("parsing_failed", message));
       setSubmissionError(message);
       setFieldErrors((current) => ({
         ...current,
@@ -346,6 +371,11 @@ export function JobCraftorWorkspace() {
   function handleClearHistory() {
     clearJobCraftorHistory();
     setHistoryEntries([]);
+  }
+
+  function handleClearTelemetry() {
+    clearJobCraftorTelemetry();
+    setTelemetryEvents([]);
   }
 
   return (
@@ -407,6 +437,7 @@ export function JobCraftorWorkspace() {
 
               <div className="space-y-6">
                 <HistoryPanel entries={historyEntries} onOpen={hydrateAnalysisFromHistory} onClear={handleClearHistory} />
+                <DiagnosticsPanel events={telemetryEvents} onClear={handleClearTelemetry} />
                 <section className="premium-card p-5 sm:p-6">
                   <ResultsEmptyState />
                 </section>
