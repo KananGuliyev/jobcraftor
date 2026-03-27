@@ -21,6 +21,22 @@ interface FeedbackState {
   message: string;
 }
 
+function metaBadge(meta: JobCraftorAnalysisMeta | null) {
+  if (!meta) {
+    return null;
+  }
+
+  if (meta.source === "demo") {
+    return { label: "Demo mode", className: "status-badge-success" };
+  }
+
+  if (meta.source === "mock_fallback") {
+    return { label: "Validated fallback", className: "status-badge-warning" };
+  }
+
+  return { label: "Live AI analysis", className: "status-badge-info" };
+}
+
 interface ResultsExperienceProps {
   isLoading: boolean;
   result: JobCraftorResult | null;
@@ -42,6 +58,7 @@ export function ResultsExperience({
 }: ResultsExperienceProps) {
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const feedbackTimer = useRef<number | null>(null);
+  const sourceBadge = metaBadge(meta);
 
   useEffect(() => {
     return () => {
@@ -124,20 +141,17 @@ export function ResultsExperience({
       <div className="premium-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="eyebrow-label">Results experience</p>
-            {demoHighlights ? (
-              <span className="status-badge-success">
-                {demoHighlights.badge}
-              </span>
-            ) : null}
+            <p className="eyebrow-label">Results dashboard</p>
+            {demoHighlights ? <span className="status-badge-success">{demoHighlights.badge}</span> : null}
+            {sourceBadge && meta?.source !== "demo" ? <span className={sourceBadge.className}>{sourceBadge.label}</span> : null}
           </div>
           <h1 className="font-display text-3xl font-semibold tracking-[-0.03em] text-sand sm:text-4xl">
-            Your JobCraftor dashboard
+            Your application plan is ready
           </h1>
           <p className="max-w-3xl text-sm leading-7 text-mist/68">
             {demoHighlights
-              ? `This instant sample walkthrough shows how JobCraftor turns a realistic ${demoHighlights.subtitle} into a focused action plan.`
-              : "This is the focused, full-width readout designed for the demo moment: scan the role, understand the fit, and walk away with a concrete plan."}
+              ? `This instant sample walkthrough shows how JobCraftor turns a realistic ${demoHighlights.subtitle} into a focused, judge-ready application plan.`
+              : "This is the main JobCraftor moment: scan the role, understand your fit, and leave with a concrete plan for what to do next."}
           </p>
         </div>
 
@@ -145,18 +159,18 @@ export function ResultsExperience({
           {result ? (
             <>
               <button type="button" onClick={handlePrint} className="button-secondary">
-                Print or save PDF
+                Save as PDF
               </button>
               <button type="button" onClick={handleDownloadSummary} className="button-secondary">
-                Export prep summary
+                Download summary
               </button>
             </>
           ) : null}
           <button type="button" onClick={onBackToWorkflow} className="button-secondary">
-            Back to inputs
+            Edit inputs
           </button>
           <button type="button" onClick={onReset} className="button-secondary">
-            Start over
+            Start new plan
           </button>
         </div>
       </div>

@@ -8,7 +8,9 @@ export function AppHeader() {
           </div>
           <div>
             <p className="font-display text-lg font-semibold text-sand">JobCraftor</p>
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-mist/55">Application execution engine</p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-mist/55">
+              Turn postings into application plans
+            </p>
           </div>
         </div>
 
@@ -22,8 +24,8 @@ export function AppHeader() {
           <a href="#results-preview" className="rounded-full px-4 py-2 transition hover:bg-white/[0.05] hover:text-sand">
             Preview
           </a>
-          <a href="#dashboard" className="rounded-full px-4 py-2 transition hover:bg-white/[0.05] hover:text-sand">
-            Workspace
+          <a href="#workflow" className="rounded-full px-4 py-2 transition hover:bg-white/[0.05] hover:text-sand">
+            Start
           </a>
         </nav>
       </div>

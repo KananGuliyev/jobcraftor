@@ -1,15 +1,15 @@
 const featureCards = [
   {
     title: "Decode the role",
-    copy: "Translate a posting into the skills, signals, and expectations that actually matter.",
+    copy: "See what the team is really hiring for, beyond a wall of requirements.",
   },
   {
     title: "Find your blockers",
-    copy: "See where your resume already fits and which gaps are most likely to hold you back.",
+    copy: "Spot the few gaps most likely to weaken the application right now.",
   },
   {
     title: "Get the plan",
-    copy: "Walk away with resume upgrades, outreach copy, interview prompts, and a 7-day action plan.",
+    copy: "Walk away with resume rewrites, outreach help, interview prep, and a 7-day plan.",
   },
 ];
 
@@ -17,17 +17,17 @@ const steps = [
   {
     number: "01",
     title: "Paste the job posting",
-    copy: "Drop in the role description or URL so JobCraftor has a concrete target to analyze.",
+    copy: "Use the real posting or job URL so the analysis is anchored to an actual target.",
   },
   {
     number: "02",
     title: "Add your resume",
-    copy: "Upload or paste your current resume so the app can compare your evidence against the role.",
+    copy: "Paste or upload your current resume and let JobCraftor normalize it into clean text.",
   },
   {
     number: "03",
     title: "Get a tailored plan",
-    copy: "Receive a focused dashboard with blockers, rewrites, outreach help, and next steps.",
+    copy: "Get a focused dashboard with fit, blockers, rewrites, outreach help, and next steps.",
   },
 ];
 
@@ -51,23 +51,22 @@ export function Hero({ onPrimaryCta, onSecondaryCta }: HeroProps) {
               Turn any job posting into a personalized action plan.
             </h1>
             <p className="max-w-2xl text-base leading-8 text-mist/72 sm:text-lg">
-              JobCraftor helps internship and job seekers understand what a role is asking for, where their resume
-              falls short, and how to close the gap fast with a credible, focused plan.
+              Understand what the role is asking for, where your resume is weak, and what to fix before you apply.
             </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <button type="button" onClick={onPrimaryCta} className="button-primary">
-              Start with your posting
+              Start your plan
             </button>
             <button type="button" onClick={onSecondaryCta} className="button-secondary">
-              Try instant demo
+              Launch instant demo
             </button>
           </div>
 
           <p className="max-w-xl text-sm leading-7 text-mist/60">
-            Designed to turn application uncertainty into structured next steps, without making students sift through
-            generic advice.
+            Best first click for judges: launch the instant demo to open a polished software engineering internship
+            walkthrough immediately.
           </p>
         </div>
 
@@ -76,21 +75,23 @@ export function Hero({ onPrimaryCta, onSecondaryCta }: HeroProps) {
           <div className="relative grid gap-5">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="section-label">Product preview</p>
+                <p className="section-label">What you get</p>
                 <h2 className="font-display text-[2rem] font-semibold tracking-[-0.02em] text-sand">
-                  A dashboard that feels actionable
+                  A dashboard built for action
                 </h2>
               </div>
               <span className="status-badge-success">
-                Live workflow
+                1-minute demo
               </span>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-[0.72fr_1.28fr]">
               <div className="surface-muted p-5">
-                <p className="section-label">Fit score</p>
+                <p className="section-label">Overall fit</p>
                 <p className="mt-3 font-display text-6xl font-semibold tracking-[-0.04em] text-sand">84</p>
-                <p className="mt-2 text-sm leading-7 text-mist/68">Promising fit with a few proof gaps to tighten before you apply.</p>
+                <p className="mt-2 text-sm leading-7 text-mist/68">
+                  Strong potential, with a few proof gaps to tighten before the application goes out.
+                </p>
               </div>
 
               <div className="grid gap-4">
@@ -110,7 +111,7 @@ export function Hero({ onPrimaryCta, onSecondaryCta }: HeroProps) {
                 </div>
 
                 <div className="surface-subtle p-5">
-                  <p className="section-label">7-day momentum</p>
+                  <p className="section-label">7-day plan</p>
                   <div className="mt-3 grid gap-3">
                     <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-ink/55 px-4 py-3 text-sm text-mist/78">
                       <span>Rewrite top bullets</span>
@@ -146,11 +147,11 @@ export function Hero({ onPrimaryCta, onSecondaryCta }: HeroProps) {
         <div className="space-y-4">
           <p className="section-label">How it works</p>
           <h2 className="max-w-[13ch] font-display text-4xl font-semibold leading-tight tracking-[-0.03em] text-sand sm:text-5xl">
-            A faster way to get from confusion to application-ready.
+            From posting to application plan in a few minutes.
           </h2>
           <p className="max-w-xl text-base leading-8 text-mist/70">
-            The workflow is intentionally narrow: understand the role, compare it against your current story, and act
-            on the gaps that matter most.
+            The workflow is intentionally narrow: understand the role, compare it against your current story, and fix
+            the gaps that matter most.
           </p>
         </div>
 
@@ -171,15 +172,15 @@ export function Hero({ onPrimaryCta, onSecondaryCta }: HeroProps) {
         <div className="space-y-4">
           <p className="section-label">Results preview</p>
           <h2 className="max-w-[12ch] font-display text-4xl font-semibold leading-tight tracking-[-0.03em] text-sand sm:text-5xl">
-            A result that feels more like a strategy session than a score.
+            More useful than a score. More focused than a chat.
           </h2>
           <p className="max-w-xl text-base leading-8 text-mist/70">
-            Students do not just need feedback. They need a plan they can execute this week. JobCraftor turns the
-            analysis into concrete next steps across resume, outreach, and interview prep.
+            Students do not just need feedback. They need to know what to do next. JobCraftor turns the analysis into
+            concrete next steps across resume, outreach, and interview prep.
           </p>
           <p className="text-sm leading-7 text-mist/60">
-            Built for students navigating internships, early-career roles, and applications that need to feel
-            intentional from the first glance.
+            Built for internships and early-career roles where a sharper story can make the difference between
+            applying and actually feeling competitive.
           </p>
         </div>
 
@@ -188,13 +189,15 @@ export function Hero({ onPrimaryCta, onSecondaryCta }: HeroProps) {
             <div className="surface-muted p-5">
               <p className="section-label">Snapshot</p>
               <h3 className="mt-3 font-display text-5xl font-semibold tracking-[-0.04em] text-sand">82/100</h3>
-              <p className="mt-3 text-sm leading-7 text-mist/70">Strong application potential if the resume tells a sharper metrics and execution story.</p>
+              <p className="mt-3 text-sm leading-7 text-mist/70">
+                Strong application potential if the resume tells a sharper execution and engineering story.
+              </p>
             </div>
 
             <div className="grid gap-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="surface-subtle p-5">
-                  <p className="section-label">Resume improvements</p>
+                  <p className="section-label">Resume upgrades</p>
                   <ul className="mt-3 grid gap-2 text-sm leading-7 text-mist/70">
                     <li>Lead with quantified ownership</li>
                     <li>Mirror role language in top bullets</li>
@@ -215,7 +218,7 @@ export function Hero({ onPrimaryCta, onSecondaryCta }: HeroProps) {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="section-label">7-day action plan</p>
-                    <h3 className="mt-1 font-display text-2xl font-semibold tracking-[-0.02em] text-sand">From insight to execution</h3>
+                    <h3 className="mt-1 font-display text-2xl font-semibold tracking-[-0.02em] text-sand">From insight to next steps</h3>
                   </div>
                   <span className="status-badge-neutral">
                     Structured next steps

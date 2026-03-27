@@ -232,11 +232,12 @@ export const demoResult: JobCraftorResult = {
 
 export const demoMeta: JobCraftorAnalysisMeta = {
   source: "demo",
-  notice: "Demo mode is showing a precomputed software engineering internship walkthrough so you can see the full product instantly.",
+  notice:
+    "Demo mode is showing a polished software engineering internship walkthrough so you can see the full product instantly and reliably.",
   model: "contest-demo",
 };
 
 export const demoHighlights = {
   badge: "Demo mode",
-  subtitle: "software engineering internship walkthrough",
+  subtitle: "software engineering internship example",
 };

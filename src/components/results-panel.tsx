@@ -21,7 +21,7 @@ export function ResultsPanel({ result, onCopyNetworking, onCopyInterviewPrep }: 
       <section className="rounded-[32px] border border-white/10 bg-white/[0.045] p-6 shadow-soft sm:p-7">
         <div className="grid gap-5 xl:grid-cols-[260px_1fr] xl:items-end">
           <div className="space-y-3">
-            <p className="eyebrow-label">Fit analysis</p>
+            <p className="eyebrow-label">Overall fit</p>
             <h1 className="font-display text-6xl font-semibold tracking-[-0.05em] text-sand sm:text-7xl">{result.fitAnalysis.score}/100</h1>
             <p className="text-base text-sand">{result.fitAnalysis.verdict}</p>
           </div>
@@ -39,9 +39,9 @@ export function ResultsPanel({ result, onCopyNetworking, onCopyInterviewPrep }: 
       <section className="grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
         <article className="premium-card p-5 sm:p-6">
           <ResultsSectionIntro
-            eyebrow="Role breakdown"
-            title="Role Breakdown"
-            description="A quick read on the work this role expects, the skills that matter most, and where to focus your story."
+            eyebrow="Role priorities"
+            title="What The Role Really Prioritizes"
+            description="A quick read on the work, signals, and story areas that matter most for this application."
           />
 
           <div className="mt-6 grid gap-4 xl:grid-cols-3">
@@ -75,9 +75,9 @@ export function ResultsPanel({ result, onCopyNetworking, onCopyInterviewPrep }: 
 
         <article className="premium-card p-5 sm:p-6">
           <ResultsSectionIntro
-            eyebrow="Fit analysis"
-            title="Fit Analysis"
-            description="Where your profile is already credible and where the current application still needs stronger proof."
+            eyebrow="Where you fit"
+            title="Current Fit"
+            description="Where the application already feels credible and where it still needs stronger proof."
           />
 
           <div className="mt-6 grid gap-4">
@@ -104,7 +104,7 @@ export function ResultsPanel({ result, onCopyNetworking, onCopyInterviewPrep }: 
         <ResultsSectionIntro
           eyebrow="Biggest blockers"
           title="Top 3 Blockers"
-          description="These are the most important concerns to resolve before or immediately after applying."
+          description="These are the issues most likely to weaken the application if you leave them untouched."
         />
 
         <div className="grid gap-4 xl:grid-cols-3">
@@ -113,7 +113,7 @@ export function ResultsPanel({ result, onCopyNetworking, onCopyInterviewPrep }: 
               <div className="flex flex-col gap-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-2">
-                    <p className="section-label">Blocker {index + 1}</p>
+                    <p className="section-label">Priority {index + 1}</p>
                     <h3 className="font-display text-2xl font-semibold tracking-[-0.02em] text-sand">{blocker.title}</h3>
                   </div>
                   <span className={priorityTone(blocker.priority)}>
@@ -131,7 +131,7 @@ export function ResultsPanel({ result, onCopyNetworking, onCopyInterviewPrep }: 
         <ResultsSectionIntro
           eyebrow="Action plan"
           title="7-Day Action Plan"
-          description="A concrete week of steps designed to make the application sharper, more credible, and easier to defend."
+          description="A concrete week of steps to make the application sharper, more credible, and easier to defend."
         />
 
         <div className="grid gap-4 xl:grid-cols-2">
@@ -145,7 +145,7 @@ export function ResultsPanel({ result, onCopyNetworking, onCopyInterviewPrep }: 
                     <p className="text-sm leading-7 text-mist/68">{day.goal}</p>
                   </div>
                   <span className="status-badge-neutral">
-                    Checklist-ready
+                    Ready to execute
                   </span>
                 </div>
 
@@ -166,9 +166,9 @@ export function ResultsPanel({ result, onCopyNetworking, onCopyInterviewPrep }: 
       <section className="grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
         <article className="premium-card p-5 sm:p-6">
           <ResultsSectionIntro
-            eyebrow="Resume improvements"
+            eyebrow="Resume upgrades"
             title="Resume Improvements"
-            description="Sharper bullet framing plus role-specific keywords to help the resume read like evidence, not effort."
+            description="Sharper bullet framing plus role-specific keywords so the resume reads like evidence, not effort."
           />
 
           <div className="mt-6 grid gap-4">
@@ -190,7 +190,7 @@ export function ResultsPanel({ result, onCopyNetworking, onCopyInterviewPrep }: 
           </div>
 
           <div className="surface-muted mt-6 p-5">
-            <p className="section-label">Keyword recommendations</p>
+            <p className="section-label">Keywords to mirror</p>
             <div className="mt-4 flex flex-wrap gap-2">
               {result.resumeImprovements.keywordRecommendations.map((keyword) => (
                 <span key={keyword} className="status-badge-neutral normal-case tracking-normal text-sm font-medium text-sand">
@@ -204,12 +204,12 @@ export function ResultsPanel({ result, onCopyNetworking, onCopyInterviewPrep }: 
         <article className="grid gap-6">
           <div className="premium-card p-5 sm:p-6">
             <ResultsSectionHeader
-              eyebrow="Networking"
+              eyebrow="Outreach"
               title="Networking Message"
               description="A short outreach draft you can adapt for alumni, recruiters, or team members."
               action={
                 <button type="button" onClick={onCopyNetworking} className="button-secondary print-hidden">
-                  Copy message
+                  Copy outreach
                 </button>
               }
             />
@@ -223,7 +223,7 @@ export function ResultsPanel({ result, onCopyNetworking, onCopyInterviewPrep }: 
             <ResultsSectionHeader
               eyebrow="Interview prep"
               title="Interview Prep"
-              description="Likely questions plus the actual evaluation signal behind each one."
+              description="Likely questions plus the real evaluation signal behind each one."
               action={
                 <button type="button" onClick={onCopyInterviewPrep} className="button-secondary print-hidden">
                   Copy questions
@@ -235,7 +235,7 @@ export function ResultsPanel({ result, onCopyNetworking, onCopyInterviewPrep }: 
               {result.interviewPrep.map((item) => (
                 <ResultsSurfaceCard key={item.question}>
                   <h3 className="font-display text-xl font-semibold tracking-[-0.02em] text-sand">{item.question}</h3>
-                  <p className="mt-3 text-sm leading-7 text-sky/74">What the interviewer is testing: {item.whatTheyAreTesting}</p>
+                  <p className="mt-3 text-sm leading-7 text-sky/74">What they are testing: {item.whatTheyAreTesting}</p>
                 </ResultsSurfaceCard>
               ))}
             </div>

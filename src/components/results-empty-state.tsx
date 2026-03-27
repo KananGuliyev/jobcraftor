@@ -11,11 +11,11 @@ export function ResultsEmptyState() {
       <div className="space-y-4">
         <p className="eyebrow-label">Results dashboard</p>
         <h2 className="max-w-[12ch] font-display text-4xl font-semibold tracking-[-0.03em] text-sand sm:text-5xl">
-          Your full JobCraftor dashboard appears here
+          Your full application plan appears here
         </h2>
         <p className="max-w-2xl text-base leading-8 text-mist/70">
-          Once you generate a plan, this screen becomes the core wow moment: a dedicated results experience built for
-          faster applications, better outreach, and stronger interview preparation.
+          Generate a plan or launch the instant demo to open the main JobCraftor moment: a dedicated dashboard built
+          for faster applications, sharper outreach, and stronger interview prep.
         </p>
       </div>
 
@@ -25,7 +25,7 @@ export function ResultsEmptyState() {
             <p className="section-label">Preview {index + 1}</p>
             <h3 className="mt-3 font-display text-xl font-semibold tracking-[-0.02em] text-sand">{item}</h3>
             <p className="mt-2 text-sm leading-7 text-mist/68">
-              Designed to feel polished, scannable, and demo-ready even before the live AI layer is wired in.
+              Designed to feel polished, scannable, and easy to understand in under a minute.
             </p>
           </article>
         ))}

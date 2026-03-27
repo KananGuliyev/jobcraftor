@@ -66,19 +66,18 @@ export function InputPanel({
         <div className="space-y-3">
           <p className="eyebrow-label">Input workspace</p>
           <h2 className="font-display text-[2rem] font-semibold tracking-[-0.02em] text-sand">
-            Generate a stronger application plan
+            Build your application plan
           </h2>
           <p className="section-subtitle max-w-2xl">
-            Paste the role, add your resume, and optionally include a target role or deadline. JobCraftor will turn
-            typed or uploaded resume content into clean text before sending it to the analysis engine.
+            Add the posting, add your resume, and let JobCraftor turn both into a role-specific plan you can act on.
           </p>
         </div>
         <div className="flex flex-wrap gap-2 self-start" id="demo">
           <button type="button" onClick={onLoadDemo} className="button-secondary">
-            Autofill sample data
+            Load sample inputs
           </button>
           <button type="button" onClick={onReset} className="button-secondary">
-            Clear form
+            Reset inputs
           </button>
         </div>
       </div>
@@ -86,22 +85,22 @@ export function InputPanel({
       <div className="mt-7 grid gap-7">
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <label className="grid gap-3">
-            <span className="text-sm font-semibold text-sand">Job description</span>
+            <span className="text-sm font-semibold text-sand">Job posting</span>
             <textarea
               value={values.jobPostingText}
               onChange={(event) => onChange("jobPostingText", event.target.value)}
               className={areaClass(Boolean(fieldErrors.jobPostingText))}
-              placeholder={`Example:\nProduct Marketing Intern\nResponsibilities include owning campaign research, supporting launch briefs, and analyzing conversion performance for student-facing products.`}
+              placeholder={`Example:\nSoftware Engineering Intern\nResponsibilities include building TypeScript and React features, debugging issues, improving product quality, and collaborating with engineering, product, and design.`}
             />
             <FieldMessage
               error={fieldErrors.jobPostingText}
-              help="Paste the role text here. Responsibilities, requirements, and preferred qualifications all help."
+              help="Paste the role text here. Responsibilities, requirements, and preferred qualifications are enough."
             />
           </label>
 
           <div className="grid gap-5">
             <label className="grid gap-3">
-              <span className="text-sm font-semibold text-sand">Job URL</span>
+              <span className="text-sm font-semibold text-sand">Job posting URL</span>
               <input
                 type="url"
                 value={values.jobPostingUrl}
@@ -111,7 +110,7 @@ export function InputPanel({
               />
               <FieldMessage
                 error={fieldErrors.jobPostingUrl}
-                help="Optional for now. If present, it must be a valid URL."
+                help="Optional. Use this if you want JobCraftor to keep company context attached to the role."
               />
             </label>
 
@@ -127,12 +126,12 @@ export function InputPanel({
                 />
                 <FieldMessage
                   error={fieldErrors.targetRole}
-                  help="Optional. Use this if you want the plan framed around a specific role title."
+                  help="Optional. Helpful if the posting title is vague or you want the output framed more directly."
                 />
               </label>
 
               <label className="grid gap-3">
-                <span className="text-sm font-semibold text-sand">Deadline</span>
+                <span className="text-sm font-semibold text-sand">Application deadline</span>
                 <input
                   type="date"
                   value={values.deadline}
@@ -141,7 +140,7 @@ export function InputPanel({
                 />
                 <FieldMessage
                   error={fieldErrors.deadline}
-                  help="Optional. Adds urgency and timing cues to the mock 7-day plan."
+                  help="Optional. Adds timing cues to the plan and helps prioritize what to do first."
                 />
               </label>
             </div>
@@ -151,9 +150,9 @@ export function InputPanel({
         <div className="grid gap-6 lg:grid-cols-[0.88fr_1.12fr]">
           <div className="grid gap-3">
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-semibold text-sand">Resume upload</span>
+              <span className="text-sm font-semibold text-sand">Resume file</span>
               <span className="text-sm leading-6 text-mist/58">
-                Supports `.txt`, `.md`, `.rtf`, `.pdf`, and `.docx` with server-side text extraction.
+                Upload `TXT`, `MD`, `RTF`, `PDF`, or `DOCX` and JobCraftor will extract clean text for review.
               </span>
             </div>
 
@@ -177,8 +176,8 @@ export function InputPanel({
                   <div className="space-y-2">
                     <h3 className="font-display text-2xl font-semibold tracking-[-0.02em] text-sand">Drop your resume here</h3>
                     <p className="text-sm leading-7 text-mist/68">
-                      Drag and drop a file, or click to browse. JobCraftor will extract clean text from supported
-                      resumes and place it into the editable field on the right.
+                      Drag and drop a file, or click to browse. The extracted text will appear in the editable field on
+                      the right.
                     </p>
                   </div>
                 </div>
@@ -195,7 +194,7 @@ export function InputPanel({
                       <span className="mt-1 block">{uploadState.helperText}</span>
                     </>
                   ) : (
-                    "No file uploaded yet. Text pasting still works, even if you upload a file."
+                    "No file uploaded yet. You can still paste resume text directly."
                   )}
                 </div>
               </div>
@@ -217,7 +216,7 @@ export function InputPanel({
           </div>
 
           <label className="grid gap-3">
-            <span className="text-sm font-semibold text-sand">Resume text</span>
+            <span className="text-sm font-semibold text-sand">Editable resume text</span>
             <textarea
               value={values.resumeText}
               onChange={(event) => onChange("resumeText", event.target.value)}
@@ -226,7 +225,7 @@ export function InputPanel({
             />
             <FieldMessage
               error={fieldErrors.resumeText}
-              help="Paste resume text directly, or let an uploaded file extract and populate clean text automatically."
+              help="Paste resume text directly, or review and edit the extracted text after upload."
             />
           </label>
         </div>
@@ -239,11 +238,11 @@ export function InputPanel({
 
         <div className="flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-2xl text-sm leading-7 text-mist/60">
-            JobCraftor turns uploaded resumes into normalized plain text before analysis. Review the extracted text and
-            edit it if anything looks off.
+            Review the extracted resume text before generating the plan so the final analysis reflects what you want to
+            submit.
           </p>
           <button type="button" onClick={onAnalyze} disabled={isLoading} className="button-primary min-w-[220px]">
-            {isUploading ? "Parsing resume..." : isLoading ? "Generating your plan..." : "Generate Plan"}
+            {isUploading ? "Parsing resume..." : isLoading ? "Building your plan..." : "Generate action plan"}
           </button>
         </div>
       </div>

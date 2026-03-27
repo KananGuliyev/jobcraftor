@@ -31,16 +31,16 @@ function sourceLabel(source: JobCraftorHistoryEntry["meta"]["source"]) {
 export function HistoryPanel({ entries, onOpen, onClear }: HistoryPanelProps) {
   return (
     <CollectionPanel
-      eyebrow="Saved history"
-      title="Revisit recent analyses"
-      description="JobCraftor saves recent dashboards in this browser so you can reopen them quickly during a live demo or compare a few applications without signing in."
+      eyebrow="Recent plans"
+      title="Reopen saved dashboards"
+      description="JobCraftor keeps recent dashboards in this browser so you can reopen one quickly during a live demo or compare a couple of applications without signing in."
       clearLabel={entries.length > 0 ? "Clear history" : undefined}
       onClear={entries.length > 0 ? onClear : undefined}
     >
       {entries.length === 0 ? (
         <CollectionPanelEmptyState
           title="No saved analyses yet"
-          description="Generate a plan or launch the instant demo, and JobCraftor will keep the latest dashboards here for quick revisit."
+          description="Generate a plan or launch the instant demo and the latest dashboards will appear here."
         />
       ) : (
         <div className="mt-6 grid gap-4">

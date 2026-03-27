@@ -2,13 +2,13 @@ export function ResultsLoadingState() {
   return (
     <div className="grid min-h-[720px] content-center gap-7 p-3">
       <div className="space-y-4">
-        <p className="eyebrow-label">Analyzing inputs</p>
+        <p className="eyebrow-label">Building your plan</p>
         <h2 className="max-w-[12ch] font-display text-4xl font-semibold tracking-[-0.03em] text-sand sm:text-5xl">
-          Building your full results dashboard
+          Preparing your full results dashboard
         </h2>
         <p className="max-w-2xl text-base leading-8 text-mist/70">
-          JobCraftor is reading the role, mapping strengths and gaps, and assembling the dedicated dashboard from the
-          server-side analysis engine.
+          JobCraftor is reading the role, comparing it against your resume, and assembling the dashboard with fit,
+          blockers, and next steps.
         </p>
       </div>
 
