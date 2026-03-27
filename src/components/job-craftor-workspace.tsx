@@ -1,17 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { demoHighlights, demoInput, demoMeta, demoResult } from "@/data/demo-content";
+import { clearJobCraftorHistory, loadJobCraftorHistory, saveJobCraftorHistoryEntry } from "@/lib/jobcraftor-history";
 import { normalizeResumeText } from "@/lib/resume-text";
 import type {
   AnalyzeJobCraftorInput,
   JobCraftorAnalysisMeta,
   JobCraftorAnalysisResponse,
+  JobCraftorHistoryEntry,
   JobCraftorResult,
   ParseResumeSuccess,
   ResumeUploadFormat,
 } from "@/types/jobcraftor";
 import { AppHeader } from "./app-header";
+import { HistoryPanel } from "./history-panel";
 import { Hero } from "./hero";
 import { InputPanel } from "./input-panel";
 import { ResultsEmptyState } from "./results-empty-state";
@@ -95,10 +98,15 @@ export function JobCraftorWorkspace() {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [result, setResult] = useState<JobCraftorResult | null>(null);
   const [analysisMeta, setAnalysisMeta] = useState<JobCraftorAnalysisMeta | null>(null);
+  const [historyEntries, setHistoryEntries] = useState<JobCraftorHistoryEntry[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [activeView, setActiveView] = useState<"workspace" | "results">("workspace");
+
+  useEffect(() => {
+    setHistoryEntries(loadJobCraftorHistory());
+  }, []);
 
   const completion = Math.round(
     ([
@@ -135,16 +143,54 @@ export function JobCraftorWorkspace() {
     setAnalysisMeta(null);
   }
 
-  function launchInstantDemo() {
+  function hydrateAnalysisFromHistory(entry: JobCraftorHistoryEntry) {
     setFormValues({
+      jobPostingText: entry.input.jobPostingText ?? "",
+      jobPostingUrl: entry.input.jobPostingUrl ?? "",
+      resumeText: entry.input.resumeText,
+      targetRole: entry.input.targetRole ?? "",
+      deadline: entry.input.deadline ?? "",
+    });
+    setUploadState({
+      fileName: entry.input.resumeFileName ?? null,
+      format: entry.input.resumeFileName ? "txt" : null,
+      sourceLabel: "Saved analysis",
+      helperText: `Saved locally on ${new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(new Date(entry.createdAt))}.`,
+    });
+    setFieldErrors({});
+    setSubmissionError(null);
+    setResult(entry.result);
+    setAnalysisMeta(entry.meta);
+    setIsGenerating(false);
+    setIsUploading(false);
+    setActiveView("results");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function launchInstantDemo() {
+    const nextInput: AnalyzeJobCraftorInput = {
       jobPostingText: demoInput.jobPostingText ?? "",
       jobPostingUrl: demoInput.jobPostingUrl ?? "",
       resumeText: demoInput.resumeText,
+      resumeFileName: demoInput.resumeFileName ?? null,
       targetRole: demoInput.targetRole ?? "",
       deadline: demoInput.deadline ?? "",
+    };
+
+    setFormValues({
+      jobPostingText: nextInput.jobPostingText ?? "",
+      jobPostingUrl: nextInput.jobPostingUrl ?? "",
+      resumeText: nextInput.resumeText,
+      targetRole: nextInput.targetRole ?? "",
+      deadline: nextInput.deadline ?? "",
     });
     setUploadState({
-      fileName: demoInput.resumeFileName ?? null,
+      fileName: nextInput.resumeFileName ?? null,
       format: "txt",
       sourceLabel: "Instant demo dataset",
       helperText: "This sample software engineering internship package is ready to explore immediately.",
@@ -155,6 +201,7 @@ export function JobCraftorWorkspace() {
     setAnalysisMeta(demoMeta);
     setIsGenerating(false);
     setIsUploading(false);
+    setHistoryEntries(saveJobCraftorHistoryEntry(nextInput, demoResult, demoMeta));
     setActiveView("results");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -210,6 +257,8 @@ export function JobCraftorWorkspace() {
       if (!response.ok || !body.result || !body.meta) {
         throw new Error(body.error ?? "JobCraftor could not generate a result.");
       }
+
+      setHistoryEntries(saveJobCraftorHistoryEntry(payload, body.result, body.meta));
 
       startTransition(() => {
         setResult(body.result ?? null);
@@ -294,6 +343,11 @@ export function JobCraftorWorkspace() {
     launchInstantDemo();
   }
 
+  function handleClearHistory() {
+    clearJobCraftorHistory();
+    setHistoryEntries([]);
+  }
+
   return (
     <main className="page-shell">
       <div className="ambient-orb left-[-10rem] top-[-8rem] h-[34rem] w-[34rem] bg-sunrise/12" />
@@ -351,9 +405,12 @@ export function JobCraftorWorkspace() {
                 />
               </div>
 
-              <section className="premium-card p-5 sm:p-6">
-                <ResultsEmptyState />
-              </section>
+              <div className="space-y-6">
+                <HistoryPanel entries={historyEntries} onOpen={hydrateAnalysisFromHistory} onClear={handleClearHistory} />
+                <section className="premium-card p-5 sm:p-6">
+                  <ResultsEmptyState />
+                </section>
+              </div>
             </section>
           </>
         ) : (

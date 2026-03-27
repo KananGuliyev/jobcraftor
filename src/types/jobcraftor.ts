@@ -152,6 +152,16 @@ export const jobCraftorAnalysisResponseSchema = z.object({
   meta: jobCraftorAnalysisMetaSchema,
 });
 
+export const jobCraftorHistoryEntrySchema = z.object({
+  id: z.string().min(1),
+  createdAt: z.string().min(1),
+  input: analyzeJobCraftorInputSchema,
+  result: jobCraftorResultSchema,
+  meta: jobCraftorAnalysisMetaSchema,
+});
+
+export const jobCraftorHistorySchema = z.array(jobCraftorHistoryEntrySchema);
+
 export type GapStrength = z.infer<typeof gapStrengthSchema>;
 export type GapItem = z.infer<typeof gapItemSchema>;
 export type ResumeRewrite = z.infer<typeof resumeRewriteSchema>;
@@ -169,6 +179,7 @@ export type AnalyzeJobCraftorInput = z.infer<typeof analyzeJobCraftorInputSchema
 export type JobCraftorAnalysisMeta = z.infer<typeof jobCraftorAnalysisMetaSchema>;
 export type JobCraftorResult = z.infer<typeof jobCraftorResultSchema>;
 export type JobCraftorAnalysisResponse = z.infer<typeof jobCraftorAnalysisResponseSchema>;
+export type JobCraftorHistoryEntry = z.infer<typeof jobCraftorHistoryEntrySchema>;
 export type ParseResumeMeta = z.infer<typeof parseResumeMetaSchema>;
 export type ParseResumeSuccess = z.infer<typeof parseResumeSuccessSchema>;
 export type ParseResumeError = z.infer<typeof parseResumeErrorSchema>;
