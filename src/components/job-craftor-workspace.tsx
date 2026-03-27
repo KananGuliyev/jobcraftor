@@ -2,11 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { demoInput } from "@/data/demo-content";
+import { normalizeResumeText } from "@/lib/resume-text";
 import type {
   AnalyzeJobCraftorInput,
   JobCraftorAnalysisMeta,
   JobCraftorAnalysisResponse,
   JobCraftorResult,
+  ParseResumeSuccess,
+  ResumeUploadFormat,
 } from "@/types/jobcraftor";
 import { AppHeader } from "./app-header";
 import { Hero } from "./hero";
@@ -27,6 +30,7 @@ interface FormValues {
 
 interface UploadState {
   fileName: string | null;
+  format: ResumeUploadFormat | null;
   sourceLabel: string | null;
   helperText: string;
 }
@@ -49,12 +53,13 @@ const emptyForm: FormValues = {
 
 const defaultUploadState: UploadState = {
   fileName: null,
+  format: null,
   sourceLabel: null,
   helperText: "No file uploaded yet.",
 };
 
 const unsupportedFileError =
-  "Upload a `.txt`, `.md`, `.rtf`, or `.pdf` resume file, or paste the resume directly into the field.";
+  "Upload a `.txt`, `.md`, `.rtf`, `.pdf`, or `.docx` resume file, or paste the resume directly into the field.";
 
 function isValidUrl(value: string) {
   try {
@@ -91,6 +96,7 @@ export function JobCraftorWorkspace() {
   const [result, setResult] = useState<JobCraftorResult | null>(null);
   const [analysisMeta, setAnalysisMeta] = useState<JobCraftorAnalysisMeta | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [activeView, setActiveView] = useState<"workspace" | "results">("workspace");
 
@@ -120,6 +126,7 @@ export function JobCraftorWorkspace() {
     });
     setUploadState({
       fileName: demoInput.resumeFileName ?? null,
+      format: "txt",
       sourceLabel: "Sample dataset",
       helperText: "Sample resume content has been loaded so the demo can run immediately.",
     });
@@ -151,7 +158,7 @@ export function JobCraftorWorkspace() {
     const payload: AnalyzeJobCraftorInput = {
       jobPostingText: formValues.jobPostingText.trim(),
       jobPostingUrl: formValues.jobPostingUrl.trim(),
-      resumeText: formValues.resumeText.trim(),
+      resumeText: normalizeResumeText(formValues.resumeText),
       resumeFileName: uploadState.fileName,
       targetRole: formValues.targetRole.trim(),
       deadline: formValues.deadline.trim(),
@@ -193,49 +200,59 @@ export function JobCraftorWorkspace() {
   }
 
   async function handleUpload(file: File) {
-    const fileName = file.name.toLowerCase();
-    const fileExtension = fileName.split(".").pop() ?? "";
-    const supportedTextTypes = ["txt", "md", "rtf"];
-    const supported = [...supportedTextTypes, "pdf"].includes(fileExtension);
+    const fallbackExtension = file.name.toLowerCase().split(".").pop() ?? "";
+    const supported = ["txt", "md", "rtf", "pdf", "docx", "doc"].includes(fallbackExtension);
 
     if (!supported) {
       setSubmissionError(unsupportedFileError);
       setFieldErrors((current) => ({
         ...current,
-        resumeText: "Use a supported file type or paste your resume directly.",
+        resumeText: "Use a supported resume file or paste your resume directly.",
       }));
       return;
     }
 
-    if (fileExtension === "pdf") {
-      const placeholderText = `[PDF resume uploaded: ${file.name}]
-PDF parsing is not wired yet, so JobCraftor is storing this upload as placeholder evidence for the mock workflow.`;
-
-      setFormValues((current) => ({
-        ...current,
-        resumeText: current.resumeText.trim() ? current.resumeText : placeholderText,
-      }));
-      setUploadState({
-        fileName: file.name,
-        sourceLabel: "PDF placeholder",
-        helperText: "PDF uploaded successfully. Full text extraction can be added later without changing this form.",
-      });
-    } else {
-      const text = await file.text();
-
-      setFormValues((current) => ({
-        ...current,
-        resumeText: text,
-      }));
-      setUploadState({
-        fileName: file.name,
-        sourceLabel: "Resume file",
-        helperText: "Text content loaded from the uploaded file. You can still edit the resume text below.",
-      });
-    }
-
-    setFieldErrors((current) => ({ ...current, resumeText: undefined }));
+    setIsUploading(true);
     setSubmissionError(null);
+    setFieldErrors((current) => ({ ...current, resumeText: undefined }));
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/parse-resume", {
+        method: "POST",
+        body: formData,
+      });
+
+      const body = (await response.json()) as Partial<ParseResumeSuccess> & { error?: string };
+
+      if (!response.ok || !body.text || !body.meta) {
+        throw new Error(body.error ?? "JobCraftor could not parse that resume file.");
+      }
+
+      setFormValues((current) => ({
+        ...current,
+        resumeText: body.text ?? current.resumeText,
+      }));
+      setUploadState({
+        fileName: body.meta.fileName,
+        format: body.meta.format,
+        sourceLabel: body.meta.sourceLabel,
+        helperText: body.meta.helperText,
+      });
+      setFieldErrors((current) => ({ ...current, resumeText: undefined }));
+      setSubmissionError(null);
+    } catch (caughtError) {
+      const message = caughtError instanceof Error ? caughtError.message : "JobCraftor could not parse that resume file.";
+      setSubmissionError(message);
+      setFieldErrors((current) => ({
+        ...current,
+        resumeText: "Upload a readable file or paste your resume directly.",
+      }));
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   function scrollToWorkflow() {
@@ -301,7 +318,8 @@ PDF parsing is not wired yet, so JobCraftor is storing this upload as placeholde
                 <InputPanel
                   values={formValues}
                   uploadState={uploadState}
-                  isLoading={isGenerating || isPending}
+                  isLoading={isGenerating || isPending || isUploading}
+                  isUploading={isUploading}
                   submissionError={submissionError}
                   fieldErrors={fieldErrors}
                   onChange={updateField}

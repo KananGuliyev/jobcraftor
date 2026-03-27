@@ -76,11 +76,28 @@ export const interviewPrepItemSchema = z.object({
 });
 
 export const analysisSourceSchema = z.enum(["ai", "mock_fallback"]);
+export const resumeUploadFormatSchema = z.enum(["txt", "md", "rtf", "pdf", "docx"]);
 
 export const jobCraftorAnalysisMetaSchema = z.object({
   source: analysisSourceSchema,
   notice: z.string().min(1).optional(),
   model: z.string().min(1).optional(),
+});
+
+export const parseResumeMetaSchema = z.object({
+  fileName: z.string().min(1),
+  format: resumeUploadFormatSchema,
+  sourceLabel: z.string().min(1),
+  helperText: z.string().min(1),
+});
+
+export const parseResumeSuccessSchema = z.object({
+  text: z.string().min(1),
+  meta: parseResumeMetaSchema,
+});
+
+export const parseResumeErrorSchema = z.object({
+  error: z.string().min(1),
 });
 
 export const jobInputSchema = z
@@ -145,9 +162,13 @@ export type BlockerItem = z.infer<typeof blockerSchema>;
 export type ResumeImprovements = z.infer<typeof resumeImprovementsSchema>;
 export type InterviewPrepItem = z.infer<typeof interviewPrepItemSchema>;
 export type AnalysisSource = z.infer<typeof analysisSourceSchema>;
+export type ResumeUploadFormat = z.infer<typeof resumeUploadFormatSchema>;
 export type JobInput = z.infer<typeof jobInputSchema>;
 export type ResumeInput = z.infer<typeof resumeInputSchema>;
 export type AnalyzeJobCraftorInput = z.infer<typeof analyzeJobCraftorInputSchema>;
 export type JobCraftorAnalysisMeta = z.infer<typeof jobCraftorAnalysisMetaSchema>;
 export type JobCraftorResult = z.infer<typeof jobCraftorResultSchema>;
 export type JobCraftorAnalysisResponse = z.infer<typeof jobCraftorAnalysisResponseSchema>;
+export type ParseResumeMeta = z.infer<typeof parseResumeMetaSchema>;
+export type ParseResumeSuccess = z.infer<typeof parseResumeSuccessSchema>;
+export type ParseResumeError = z.infer<typeof parseResumeErrorSchema>;

@@ -1,9 +1,11 @@
 "use client";
 
 import { useId, useState, type DragEvent } from "react";
+import type { ResumeUploadFormat } from "@/types/jobcraftor";
 
 interface UploadState {
   fileName: string | null;
+  format: ResumeUploadFormat | null;
   sourceLabel: string | null;
   helperText: string;
 }
@@ -26,6 +28,7 @@ interface InputPanelProps {
   };
   uploadState: UploadState;
   isLoading: boolean;
+  isUploading: boolean;
   submissionError: string | null;
   fieldErrors: FieldErrors;
   onChange: (field: "jobPostingText" | "jobPostingUrl" | "resumeText" | "targetRole" | "deadline", value: string) => void;
@@ -51,6 +54,7 @@ export function InputPanel({
   values,
   uploadState,
   isLoading,
+  isUploading,
   submissionError,
   fieldErrors,
   onChange,
@@ -79,8 +83,8 @@ export function InputPanel({
           <p className="text-xs uppercase tracking-[0.28em] text-sky/80">Input workspace</p>
           <h2 className="font-display text-3xl font-semibold text-sand">Generate a stronger application plan</h2>
           <p className="section-copy max-w-2xl">
-            Paste the role, add your resume, and optionally include a target role or deadline. The current workflow
-            returns polished mock analysis so the full product experience works before live AI parsing is added.
+            Paste the role, add your resume, and optionally include a target role or deadline. JobCraftor will turn
+            typed or uploaded resume content into clean text before sending it to the analysis engine.
           </p>
         </div>
         <div className="flex flex-wrap gap-2" id="demo">
@@ -162,7 +166,9 @@ export function InputPanel({
           <div className="grid gap-3">
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold text-sand">Resume upload</span>
-              <span className="text-sm text-mist/60">Supports `.txt`, `.md`, `.rtf`, and `.pdf` for placeholder-ready parsing.</span>
+              <span className="text-sm text-mist/60">
+                Supports `.txt`, `.md`, `.rtf`, `.pdf`, and `.docx` with server-side text extraction.
+              </span>
             </div>
 
             <label
@@ -183,15 +189,20 @@ export function InputPanel({
                   <div className="space-y-2">
                     <h3 className="font-display text-2xl font-semibold text-sand">Drop your resume here</h3>
                     <p className="text-sm leading-7 text-mist/72">
-                      Drag and drop a file, or click to browse. PDFs are accepted now with placeholder handling so
-                      better parsing can be added later without changing the workflow.
+                      Drag and drop a file, or click to browse. JobCraftor will extract clean text from supported
+                      resumes and place it into the editable field on the right.
                     </p>
                   </div>
                 </div>
 
                 <div className="rounded-[20px] border border-white/10 bg-white/5 px-4 py-3 text-sm text-mist/72">
-                  {uploadState.fileName ? (
+                  {isUploading ? (
+                    "Parsing your resume and normalizing the extracted text..."
+                  ) : uploadState.fileName ? (
                     <>
+                      {uploadState.sourceLabel ? (
+                        <span className="mb-1 block text-xs uppercase tracking-[0.16em] text-sky/78">{uploadState.sourceLabel}</span>
+                      ) : null}
                       <span className="font-semibold text-sand">{uploadState.fileName}</span>
                       <span className="block mt-1">{uploadState.helperText}</span>
                     </>
@@ -205,13 +216,14 @@ export function InputPanel({
             <input
               id={inputId}
               type="file"
-              accept=".txt,.md,.rtf,.pdf,text/plain,text/markdown,application/rtf,application/pdf"
+              accept=".txt,.md,.rtf,.pdf,.doc,.docx,text/plain,text/markdown,application/rtf,text/rtf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               className="hidden"
               onChange={(event) => {
                 const file = event.target.files?.[0];
                 if (file) {
                   onUpload(file);
                 }
+                event.currentTarget.value = "";
               }}
             />
           </div>
@@ -226,7 +238,7 @@ export function InputPanel({
             />
             <FieldMessage
               error={fieldErrors.resumeText}
-              help="Paste resume text directly, or let an uploaded text-based file populate this field automatically."
+              help="Paste resume text directly, or let an uploaded file extract and populate clean text automatically."
             />
           </label>
         </div>
@@ -239,11 +251,11 @@ export function InputPanel({
 
         <div className="flex flex-col gap-3 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-2xl text-sm leading-7 text-mist/62">
-            JobCraftor uses mock analysis on this screen today, but the input contract is structured for richer resume
-            parsing and live AI analysis next.
+            JobCraftor turns uploaded resumes into normalized plain text before analysis. Review the extracted text and
+            edit it if anything looks off.
           </p>
           <button type="button" onClick={onAnalyze} disabled={isLoading} className="button-primary min-w-[220px]">
-            {isLoading ? "Generating your plan..." : "Generate Plan"}
+            {isUploading ? "Parsing resume..." : isLoading ? "Generating your plan..." : "Generate Plan"}
           </button>
         </div>
       </div>
