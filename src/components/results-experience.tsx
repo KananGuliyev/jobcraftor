@@ -1,3 +1,11 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import {
+  buildApplicationPrepSummary,
+  buildInterviewQuestionsCopy,
+  buildNetworkingMessageCopy,
+} from "@/lib/jobcraftor-export";
 import type { JobCraftorAnalysisMeta, JobCraftorResult } from "@/types/jobcraftor";
 import { ResultsEmptyState } from "./results-empty-state";
 import { ResultsLoadingState } from "./results-loading-state";
@@ -6,6 +14,11 @@ import { ResultsPanel } from "./results-panel";
 interface DemoHighlights {
   badge: string;
   subtitle: string;
+}
+
+interface FeedbackState {
+  tone: "success" | "error";
+  message: string;
 }
 
 interface ResultsExperienceProps {
@@ -27,6 +40,85 @@ export function ResultsExperience({
   onBackToWorkflow,
   onReset,
 }: ResultsExperienceProps) {
+  const [feedback, setFeedback] = useState<FeedbackState | null>(null);
+  const feedbackTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (feedbackTimer.current) {
+        window.clearTimeout(feedbackTimer.current);
+      }
+    };
+  }, []);
+
+  function showFeedback(tone: FeedbackState["tone"], message: string) {
+    setFeedback({ tone, message });
+
+    if (feedbackTimer.current) {
+      window.clearTimeout(feedbackTimer.current);
+    }
+
+    feedbackTimer.current = window.setTimeout(() => {
+      setFeedback(null);
+    }, 2600);
+  }
+
+  async function copyText(label: string, value: string) {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = value;
+        textArea.setAttribute("readonly", "true");
+        textArea.style.position = "absolute";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+
+      showFeedback("success", `${label} copied.`);
+    } catch {
+      showFeedback("error", `JobCraftor could not copy the ${label.toLowerCase()}.`);
+    }
+  }
+
+  function handlePrint() {
+    try {
+      window.print();
+      showFeedback("success", "Print dialog opened. You can save the dashboard as a PDF.");
+    } catch {
+      showFeedback("error", "JobCraftor could not open the print dialog.");
+    }
+  }
+
+  function handleDownloadSummary() {
+    if (!result) {
+      return;
+    }
+
+    try {
+      const text = buildApplicationPrepSummary(result);
+      const fileName = `${result.roleTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "jobcraftor"}-prep-summary.txt`;
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+
+      anchor.href = url;
+      anchor.download = fileName;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(url);
+
+      showFeedback("success", "Application prep summary downloaded.");
+    } catch {
+      showFeedback("error", "JobCraftor could not export the prep summary.");
+    }
+  }
+
   return (
     <section className="grid gap-6" id="results-experience">
       <div className="premium-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
@@ -49,7 +141,17 @@ export function ResultsExperience({
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="print-hidden flex flex-wrap gap-3">
+          {result ? (
+            <>
+              <button type="button" onClick={handlePrint} className="button-secondary">
+                Print or save PDF
+              </button>
+              <button type="button" onClick={handleDownloadSummary} className="button-secondary">
+                Export prep summary
+              </button>
+            </>
+          ) : null}
           <button type="button" onClick={onBackToWorkflow} className="button-secondary">
             Back to inputs
           </button>
@@ -58,6 +160,18 @@ export function ResultsExperience({
           </button>
         </div>
       </div>
+
+      {feedback ? (
+        <div
+          className={`print-hidden rounded-[20px] px-4 py-3 text-sm leading-7 ${
+            feedback.tone === "success"
+              ? "border border-mint/25 bg-mint/10 text-sand"
+              : "border border-ember/30 bg-ember/10 text-orange-100"
+          }`}
+        >
+          {feedback.message}
+        </div>
+      ) : null}
 
       <div className="premium-card p-5 sm:p-6">
         {error ? (
@@ -76,7 +190,13 @@ export function ResultsExperience({
           </div>
         ) : null}
         {isLoading ? <ResultsLoadingState /> : null}
-        {!isLoading && result ? <ResultsPanel result={result} /> : null}
+        {!isLoading && result ? (
+          <ResultsPanel
+            result={result}
+            onCopyNetworking={() => copyText("Networking message", buildNetworkingMessageCopy(result))}
+            onCopyInterviewPrep={() => copyText("Interview questions", buildInterviewQuestionsCopy(result))}
+          />
+        ) : null}
         {!isLoading && !result ? <ResultsEmptyState /> : null}
       </div>
     </section>

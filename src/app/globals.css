@@ -176,3 +176,44 @@ body {
     transform: translateX(200%);
   }
 }
+
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+  }
+
+  .print-hidden,
+  header,
+  .ambient-orb {
+    display: none !important;
+  }
+
+  .page-shell,
+  .landing-shell {
+    overflow: visible !important;
+    max-width: none !important;
+    gap: 0 !important;
+    padding: 0 !important;
+  }
+
+  .premium-card,
+  .surface-subtle,
+  .surface-muted,
+  .panel-surface {
+    border-color: #d8dee7 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    break-inside: avoid;
+  }
+
+  #results-experience {
+    gap: 1rem !important;
+  }
+
+  #results-experience *,
+  #dashboard * {
+    color: #111827 !important;
+  }
+}

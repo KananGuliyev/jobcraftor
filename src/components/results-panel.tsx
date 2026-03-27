@@ -1,7 +1,11 @@
+"use client";
+
 import type { BlockerItem, JobCraftorResult } from "@/types/jobcraftor";
 
 interface ResultsPanelProps {
   result: JobCraftorResult;
+  onCopyNetworking: () => void;
+  onCopyInterviewPrep: () => void;
 }
 
 function priorityTone(priority: BlockerItem["priority"]) {
@@ -30,7 +34,7 @@ function SectionIntro({
   );
 }
 
-export function ResultsPanel({ result }: ResultsPanelProps) {
+export function ResultsPanel({ result, onCopyNetworking, onCopyInterviewPrep }: ResultsPanelProps) {
   return (
     <div className="grid gap-8" id="dashboard">
       <section className="rounded-[32px] border border-white/10 bg-white/[0.045] p-6 shadow-soft sm:p-7">
@@ -223,11 +227,16 @@ export function ResultsPanel({ result }: ResultsPanelProps) {
 
         <article className="grid gap-6">
           <div className="premium-card p-5 sm:p-6">
-            <SectionIntro
-              eyebrow="Networking"
-              title="Networking Message"
-              description="A short outreach draft you can adapt for alumni, recruiters, or team members."
-            />
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <SectionIntro
+                eyebrow="Networking"
+                title="Networking Message"
+                description="A short outreach draft you can adapt for alumni, recruiters, or team members."
+              />
+              <button type="button" onClick={onCopyNetworking} className="button-secondary print-hidden">
+                Copy message
+              </button>
+            </div>
 
             <div className="surface-subtle mt-6 p-5">
               <p className="text-sm leading-8 text-mist/76">{result.networkingMessage}</p>
@@ -235,11 +244,16 @@ export function ResultsPanel({ result }: ResultsPanelProps) {
           </div>
 
           <div className="premium-card p-5 sm:p-6">
-            <SectionIntro
-              eyebrow="Interview prep"
-              title="Interview Prep"
-              description="Likely questions plus the actual evaluation signal behind each one."
-            />
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <SectionIntro
+                eyebrow="Interview prep"
+                title="Interview Prep"
+                description="Likely questions plus the actual evaluation signal behind each one."
+              />
+              <button type="button" onClick={onCopyInterviewPrep} className="button-secondary print-hidden">
+                Copy questions
+              </button>
+            </div>
 
             <div className="mt-6 grid gap-4">
               {result.interviewPrep.map((item) => (
