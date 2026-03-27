@@ -1,69 +1,96 @@
 # JobCraftor
 
-JobCraftor turns a job or internship posting plus a resume into a personalized application execution plan.
+JobCraftor turns a job or internship posting into a personalized action plan.
 
-The app is designed for fast demo value:
-- paste a job posting or URL
-- paste or upload a resume
-- generate a structured plan with fit analysis, blockers, resume improvements, networking copy, and interview prep
-- launch an instant software engineering internship demo in one click
+It is a focused application-prep product for students and early-career candidates: paste a posting, add a resume, and get a concrete execution plan instead of vague career advice.
 
-## Why this app exists
+## Product Overview
 
-Students often know they are interested in a role, but they do not know how competitive they are yet or what to do next. JobCraftor focuses that uncertainty into a concrete next-step workflow instead of a generic AI chat.
+JobCraftor is built around a single high-value workflow:
 
-## Product flow
+1. Paste a job posting or job URL
+2. Paste or upload a resume
+3. Generate a structured analysis
+4. Leave with a clearer understanding of fit, gaps, and what to do over the next 7 days
 
-1. Landing page with a clear product promise and instant demo path
-2. Input workflow for job posting, resume, target role, and deadline
-3. Server-side analysis with strict schema validation
-4. Results dashboard with:
+The goal is not to be a generic AI assistant. The goal is to help a candidate move from uncertainty to action quickly.
+
+## The Problem It Solves
+
+Students often find promising roles but struggle with the next step:
+- what does this role actually prioritize?
+- how competitive am I right now?
+- what is missing from my resume?
+- what should I fix before I apply?
+
+Most tools stop at generic resume tips or unstructured chat. JobCraftor translates a real job posting and a real resume into a practical, role-specific application plan.
+
+## Core Workflow
+
+JobCraftor is designed to be easy to demo and easy to use:
+
+1. Start from the landing page or launch instant demo mode
+2. Add a job posting, optional job URL, resume text or uploaded file, and optional target role/deadline
+3. Run analysis through the server-side structured analysis pipeline
+4. Review a polished dashboard with:
    - role breakdown
    - fit analysis
-   - top blockers
+   - top 3 blockers
    - 7-day action plan
    - resume improvements
    - networking message
    - interview prep
-5. Export/share actions and lightweight local history
+5. Export or reuse the output through print/export, copy actions, and saved local history
 
-## Tech stack
+## Feature List
+
+- Clean landing page with clear product positioning
+- One-click instant demo for contest judging
+- Resume input via paste or upload
+- Practical resume parsing for `TXT`, `MD`, `RTF`, `PDF`, and `DOCX`
+- Server-side AI analysis with strict schema validation
+- Deterministic fallback engine for demo reliability
+- Full results dashboard with actionable sections
+- Export and share actions for key outputs
+- Lightweight saved history in the browser
+- Lightweight internal diagnostics for demo/debug confidence
+
+## Tech Stack
 
 - Next.js 15 App Router
 - TypeScript
 - Tailwind CSS
 - Zod for shared schemas and runtime validation
 - OpenAI Responses API for structured analysis
-- Deterministic mock fallback engine for demo reliability
+- Mammoth for `DOCX` extraction
+- `pdf-parse` for PDF text extraction
 - Vitest for lightweight critical-path tests
 
-## Environment variables
-
-Copy `.env.example` to `.env.local`.
-
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `OPENAI_API_KEY` | No | Enables live AI analysis. If missing, the app falls back to the built-in mock analysis engine. |
-| `OPENAI_MODEL` | No | Overrides the default model. Defaults to `gpt-4o-mini`. |
-
-Notes:
-- No API keys are exposed to the client.
-- The app is still usable without `OPENAI_API_KEY`; it will continue to work with the validated fallback path.
-
-## Local setup
+## Local Setup
 
 ### Prerequisites
 
 - Node.js `20.11+`
 - npm `10+`
 
-### Install
+### Install dependencies
 
 ```bash
 npm install
 ```
 
-### Start development
+### Configure environment
+
+Copy `.env.example` to `.env.local`.
+
+Available environment variables:
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `OPENAI_API_KEY` | No | Enables live AI analysis. If missing, JobCraftor falls back to the validated mock engine. |
+| `OPENAI_MODEL` | No | Optional model override. Defaults to `gpt-4o-mini`. |
+
+### Run locally
 
 ```bash
 npm run dev
@@ -71,9 +98,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Quality checks
-
-Run the main checks individually:
+### Verify locally
 
 ```bash
 npm run test
@@ -81,71 +106,49 @@ npm run lint
 npm run build
 ```
 
-Or run the full verification pass:
+Or run the full check:
 
 ```bash
 npm run check
 ```
 
-## Deployment recommendation
+## How AI Analysis Works
 
-### Best target: Vercel
+At a high level, JobCraftor uses a server-side structured analysis pipeline:
 
-Vercel is the best production target for this app because:
-- it is the most straightforward host for a Next.js App Router project
-- server routes for analysis and resume parsing work naturally there
-- the deployment workflow is fast and contest-friendly
-- preview deployments are easy if you want a shareable review URL
+1. The client sends validated job and resume input to `/api/analyze`
+2. The server builds a constrained prompt around the current product schema
+3. The model returns structured JSON shaped to the app's Zod schemas
+4. The response is validated before it reaches the UI
+5. If live AI fails or is unavailable, JobCraftor falls back to a deterministic mock analysis engine so the product still works reliably
 
-### Recommended production settings
+This keeps API keys server-side, keeps the frontend contract stable, and makes the app safer to demo.
 
-- Framework preset: `Next.js`
-- Node version: `20.x`
-- Build command: `npm run build`
-- Install command: `npm install`
-- Start command: `npm run start`
-- Environment variables:
-  - `OPENAI_API_KEY`
-  - `OPENAI_MODEL` optional
+## Demo Mode
 
-### Deploy steps on Vercel
+JobCraftor includes a polished instant demo path tailored to a software engineering internship.
 
-1. Import the GitHub repository.
-2. Confirm the framework is detected as Next.js.
-3. Set `OPENAI_API_KEY` in the Vercel project settings if you want live AI analysis.
-4. Optionally set `OPENAI_MODEL`.
-5. Deploy.
+With one click, a judge can open:
+- a realistic sample job posting
+- a realistic student resume
+- a precomputed high-quality results dashboard
 
-If the OpenAI key is not configured, the production app still works using the mock fallback engine.
+This makes the core product value visible immediately and avoids depending on live generation during a contest demo.
 
-## Production notes
+## Future Improvements
 
-- The analysis and resume parsing routes are pinned to the Node runtime because they rely on Node-compatible libraries.
-- Resume parsing supports `TXT`, `MD`, `RTF`, `PDF`, and `DOCX`.
-- Legacy `.doc` files are intentionally rejected for lower parsing risk.
-- Successful analyses, demo usage, and lightweight debug events are stored locally in the browser for MVP reliability.
-- Export uses browser-native print/save behavior instead of a heavy PDF generation dependency.
+- Save analysis history across devices with authenticated accounts
+- Add richer resume parsing and section-aware extraction
+- Improve export options with richer branded PDFs
+- Add recruiter-facing cover letter generation
+- Support more role families beyond internship-heavy workflows
+- Add deeper analysis memory and application tracking over time
 
-## Deployment blockers review
+## Deployment Notes
 
-No obvious blockers remain for a normal Vercel deployment.
+Vercel is the best deployment target for this app. It fits the Next.js architecture naturally, supports the server routes cleanly, and is the fastest path to a polished hosted demo.
 
-Known practical considerations:
-- Live AI analysis requires `OPENAI_API_KEY`.
-- PDF and DOCX parsing increase server-side bundle/runtime needs, so the Node runtime is required.
-- Local saved history and diagnostics are browser-only by design and do not sync across devices.
-
-## Project scripts
-
-```bash
-npm run dev
-npm run test
-npm run lint
-npm run build
-npm run check
-npm run start
-```
-
-## Demo path
-
-For a contest demo, use the instant demo CTA on the landing page first. It opens a polished, precomputed software engineering internship walkthrough immediately, which makes the app reliable even if live AI is unavailable.
+Key production notes:
+- The AI and resume parsing routes run on the Node runtime
+- The app is deployable even without `OPENAI_API_KEY` because the fallback engine preserves the experience
+- Browser-local history and diagnostics are intentionally local-only for this MVP
