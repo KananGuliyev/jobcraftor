@@ -295,9 +295,9 @@ export function JobCraftorWorkspace() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden">
-      <div className="pointer-events-none absolute left-[-10rem] top-[-8rem] h-[34rem] w-[34rem] rounded-full bg-sunrise/20 blur-3xl" />
-      <div className="pointer-events-none absolute right-[-10rem] top-[12rem] h-[36rem] w-[36rem] rounded-full bg-sky/20 blur-3xl" />
+    <main className="page-shell">
+      <div className="ambient-orb left-[-10rem] top-[-8rem] h-[34rem] w-[34rem] bg-sunrise/12" />
+      <div className="ambient-orb right-[-10rem] top-[12rem] h-[36rem] w-[36rem] bg-sky/10" />
 
       <AppHeader />
 
@@ -313,12 +313,12 @@ export function JobCraftorWorkspace() {
                     <SectionHeading
                       eyebrow="Workflow progress"
                       title={`${completion}% complete`}
-                      description="Add the role, your resume, and optional application context, then generate a structured dashboard from the mock analysis route."
+                      description="Add the role, your resume, and optional application context, then generate a structured dashboard built for fast decisions and stronger applications."
                     />
                     <div className="w-full max-w-xs space-y-3">
                       <div className="h-3 overflow-hidden rounded-full bg-white/10">
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-sunrise to-sky transition-all"
+                          className="h-full rounded-full bg-gradient-to-r from-sunrise via-[#f2bb76] to-sky transition-all"
                           style={{ width: `${completion}%` }}
                         />
                       </div>

@@ -47,7 +47,7 @@ function areaClass(hasError: boolean) {
 }
 
 function FieldMessage({ error, help }: { error?: string; help: string }) {
-  return <p className={`text-sm ${error ? "text-orange-100" : "text-mist/60"}`}>{error ?? help}</p>;
+  return <p className={`text-sm leading-6 ${error ? "text-orange-100" : "text-mist/58"}`}>{error ?? help}</p>;
 }
 
 export function InputPanel({
@@ -78,16 +78,18 @@ export function InputPanel({
 
   return (
     <section className="premium-card p-5 sm:p-6" id="workflow">
-      <div className="flex flex-col gap-4 border-b border-white/10 pb-5 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.28em] text-sky/80">Input workspace</p>
-          <h2 className="font-display text-3xl font-semibold text-sand">Generate a stronger application plan</h2>
-          <p className="section-copy max-w-2xl">
+      <div className="flex flex-col gap-5 border-b border-white/10 pb-6 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-3">
+          <p className="eyebrow-label">Input workspace</p>
+          <h2 className="font-display text-[2rem] font-semibold tracking-[-0.02em] text-sand">
+            Generate a stronger application plan
+          </h2>
+          <p className="section-subtitle max-w-2xl">
             Paste the role, add your resume, and optionally include a target role or deadline. JobCraftor will turn
             typed or uploaded resume content into clean text before sending it to the analysis engine.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2" id="demo">
+        <div className="flex flex-wrap gap-2 self-start" id="demo">
           <button type="button" onClick={onLoadDemo} className="button-secondary">
             Autofill sample data
           </button>
@@ -97,7 +99,7 @@ export function InputPanel({
         </div>
       </div>
 
-      <div className="mt-6 grid gap-6">
+      <div className="mt-7 grid gap-7">
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <label className="grid gap-3">
             <span className="text-sm font-semibold text-sand">Job description</span>
@@ -121,7 +123,7 @@ export function InputPanel({
                 value={values.jobPostingUrl}
                 onChange={(event) => onChange("jobPostingUrl", event.target.value)}
                 className={fieldClass(Boolean(fieldErrors.jobPostingUrl))}
-                placeholder="https://company.com/careers/product-operations-intern"
+                placeholder="https://company.com/careers/software-engineering-intern"
               />
               <FieldMessage
                 error={fieldErrors.jobPostingUrl}
@@ -137,7 +139,7 @@ export function InputPanel({
                   value={values.targetRole}
                   onChange={(event) => onChange("targetRole", event.target.value)}
                   className={fieldClass(Boolean(fieldErrors.targetRole))}
-                  placeholder="Product Operations Intern"
+                  placeholder="Software Engineering Intern"
                 />
                 <FieldMessage
                   error={fieldErrors.targetRole}
@@ -166,7 +168,7 @@ export function InputPanel({
           <div className="grid gap-3">
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold text-sand">Resume upload</span>
-              <span className="text-sm text-mist/60">
+              <span className="text-sm leading-6 text-mist/58">
                 Supports `.txt`, `.md`, `.rtf`, `.pdf`, and `.docx` with server-side text extraction.
               </span>
             </div>
@@ -185,26 +187,28 @@ export function InputPanel({
             >
               <div className="flex h-full flex-col justify-between gap-5">
                 <div className="space-y-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/6 text-lg text-sand">+</div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.045] text-lg text-sand">
+                    +
+                  </div>
                   <div className="space-y-2">
-                    <h3 className="font-display text-2xl font-semibold text-sand">Drop your resume here</h3>
-                    <p className="text-sm leading-7 text-mist/72">
+                    <h3 className="font-display text-2xl font-semibold tracking-[-0.02em] text-sand">Drop your resume here</h3>
+                    <p className="text-sm leading-7 text-mist/68">
                       Drag and drop a file, or click to browse. JobCraftor will extract clean text from supported
                       resumes and place it into the editable field on the right.
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-[20px] border border-white/10 bg-white/5 px-4 py-3 text-sm text-mist/72">
+                <div className="surface-subtle px-4 py-3 text-sm text-mist/68">
                   {isUploading ? (
                     "Parsing your resume and normalizing the extracted text..."
                   ) : uploadState.fileName ? (
                     <>
                       {uploadState.sourceLabel ? (
-                        <span className="mb-1 block text-xs uppercase tracking-[0.16em] text-sky/78">{uploadState.sourceLabel}</span>
+                        <span className="status-badge-info mb-2 w-fit">{uploadState.sourceLabel}</span>
                       ) : null}
                       <span className="font-semibold text-sand">{uploadState.fileName}</span>
-                      <span className="block mt-1">{uploadState.helperText}</span>
+                      <span className="mt-1 block">{uploadState.helperText}</span>
                     </>
                   ) : (
                     "No file uploaded yet. Text pasting still works, even if you upload a file."
@@ -244,13 +248,13 @@ export function InputPanel({
         </div>
 
         {submissionError ? (
-          <div className="rounded-[20px] border border-ember/30 bg-ember/10 px-4 py-3 text-sm text-orange-100">
+          <div className="rounded-[20px] border border-ember/30 bg-ember/10 px-4 py-3 text-sm leading-7 text-orange-100">
             {submissionError}
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-3 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="max-w-2xl text-sm leading-7 text-mist/62">
+        <div className="flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="max-w-2xl text-sm leading-7 text-mist/60">
             JobCraftor turns uploaded resumes into normalized plain text before analysis. Review the extracted text and
             edit it if anything looks off.
           </p>

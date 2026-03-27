@@ -12,56 +12,167 @@ html {
 
 body {
   @apply min-h-screen bg-hero-mesh font-body text-sand antialiased;
+  background-attachment: fixed;
 }
 
 ::selection {
   @apply bg-sunrise/30 text-white;
 }
 
+.page-shell {
+  @apply relative min-h-screen overflow-hidden;
+}
+
+.ambient-orb {
+  @apply pointer-events-none absolute rounded-full blur-3xl;
+}
+
 .panel-surface {
-  @apply rounded-[28px] border border-white/10 bg-panel/80 shadow-soft backdrop-blur-xl;
+  @apply rounded-[28px] border border-white/10 bg-panel/85 shadow-soft backdrop-blur-xl;
 }
 
 .premium-card {
-  @apply rounded-[28px] border border-white/10 bg-white/[0.045] shadow-soft backdrop-blur-xl;
+  @apply rounded-[28px] border border-white/10 bg-white/[0.04] shadow-soft backdrop-blur-xl transition duration-200;
+}
+
+.premium-card-interactive {
+  @apply premium-card hover:-translate-y-0.5 hover:border-white/15 hover:bg-white/[0.05];
+}
+
+.surface-subtle {
+  @apply rounded-[24px] border border-white/10 bg-white/[0.035];
+}
+
+.surface-muted {
+  @apply rounded-[24px] border border-white/10 bg-ink/55;
 }
 
 .landing-shell {
-  @apply relative mx-auto flex max-w-[1380px] flex-col gap-20 px-4 py-8 sm:px-6 sm:py-10 xl:px-8;
+  @apply relative mx-auto flex max-w-[1380px] flex-col gap-16 px-4 py-6 sm:px-6 sm:py-8 xl:px-8;
 }
 
 .section-block {
-  @apply grid gap-6;
+  @apply grid gap-8;
 }
 
 .section-copy {
-  @apply text-sm text-mist/70;
+  @apply text-sm leading-7;
+  color: rgb(220 230 242 / 0.68);
+}
+
+.eyebrow-label {
+  @apply text-[11px] font-semibold uppercase tracking-[0.24em];
+  color: rgb(140 212 255 / 0.74);
+}
+
+.section-label {
+  @apply text-xs font-semibold uppercase tracking-[0.24em];
+  color: rgb(140 212 255 / 0.74);
+}
+
+.section-title {
+  @apply font-display text-2xl font-semibold tracking-[-0.02em] text-sand sm:text-[2rem];
+}
+
+.section-subtitle {
+  @apply max-w-3xl text-sm leading-7;
+  color: rgb(220 230 242 / 0.68);
 }
 
 .field-area {
-  @apply min-h-[220px] w-full rounded-[22px] border border-white/10 bg-ink/80 px-5 py-4 text-[15px] leading-7 text-sand outline-none transition focus:border-sunrise/80 focus:ring-4 focus:ring-sunrise/10;
+  @apply min-h-[220px] w-full rounded-[22px] border border-white/10 bg-ink/75 px-5 py-4 text-[15px] leading-7 text-sand outline-none transition duration-200;
 }
 
 .field-input {
-  @apply w-full rounded-[18px] border border-white/10 bg-ink/80 px-4 py-3 text-[15px] text-sand outline-none transition focus:border-sunrise/80 focus:ring-4 focus:ring-sunrise/10;
+  @apply w-full rounded-[18px] border border-white/10 bg-ink/75 px-4 py-3 text-[15px] text-sand outline-none transition duration-200;
 }
 
 .field-input-error {
-  @apply border-ember/45 bg-ember/5 focus:border-ember/70 focus:ring-ember/15;
+  border-color: rgb(255 131 95 / 0.45);
+  background-color: rgb(255 131 95 / 0.05);
+}
+
+.field-area::placeholder,
+.field-input::placeholder {
+  color: rgb(220 230 242 / 0.35);
+}
+
+.field-area:focus,
+.field-input:focus {
+  border-color: rgb(140 212 255 / 0.35);
+  background-color: rgb(9 17 31 / 0.8);
+  box-shadow: 0 0 0 4px rgb(140 212 255 / 0.1);
+}
+
+.field-input-error:focus {
+  border-color: rgb(255 131 95 / 0.6);
+  box-shadow: 0 0 0 4px rgb(255 131 95 / 0.15);
 }
 
 .token {
-  @apply rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-sand;
+  @apply rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-sm text-sand;
 }
 
 .button-primary {
-  @apply inline-flex items-center justify-center rounded-full bg-gradient-to-r from-sunrise to-ember px-5 py-3 text-sm font-semibold text-slate-900 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(246,165,79,0.22)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sunrise/20;
+  @apply inline-flex items-center justify-center rounded-full bg-sunrise px-5 py-3 text-sm font-semibold text-slate-950 transition duration-200 hover:-translate-y-0.5 hover:bg-[#f8b063] hover:shadow-[0_16px_36px_rgba(246,165,79,0.2)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:bg-sunrise/45 disabled:text-slate-900/70 disabled:shadow-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sunrise/20;
 }
 
 .button-secondary {
-  @apply inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-sand transition duration-200 hover:-translate-y-0.5 hover:border-sky/30 hover:bg-sky/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/15;
+  @apply inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-sand transition duration-200 hover:-translate-y-0.5 hover:border-white/15 hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/15;
 }
 
 .dropzone-surface {
-  @apply rounded-[24px] border border-dashed border-white/15 bg-ink/65 p-5 transition duration-200;
+  @apply rounded-[24px] border border-dashed border-white/15 bg-ink/65 p-5 transition duration-200 hover:border-white/20 hover:bg-ink/70;
+}
+
+.status-badge {
+  @apply inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em];
+}
+
+.status-badge-neutral {
+  @apply status-badge border-white/10 bg-white/[0.045];
+  color: rgb(220 230 242 / 0.72);
+}
+
+.status-badge-info {
+  @apply status-badge;
+  border-color: rgb(140 212 255 / 0.2);
+  background-color: rgb(140 212 255 / 0.1);
+  color: rgb(140 212 255);
+}
+
+.status-badge-success {
+  @apply status-badge;
+  border-color: rgb(141 216 177 / 0.25);
+  background-color: rgb(141 216 177 / 0.1);
+  color: rgb(141 216 177);
+}
+
+.status-badge-warning {
+  @apply status-badge;
+  border-color: rgb(246 165 79 / 0.25);
+  background-color: rgb(246 165 79 / 0.1);
+  color: rgb(244 237 227);
+}
+
+.status-badge-danger {
+  @apply status-badge;
+  border-color: rgb(255 131 95 / 0.3);
+  background-color: rgb(255 131 95 / 0.1);
+  color: rgb(255 237 213);
+}
+
+.skeleton-block {
+  @apply overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.045] before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.8s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/[0.06] before:to-transparent;
+  position: relative;
+}
+
+.skeleton-line {
+  @apply skeleton-block h-4 rounded-full;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(200%);
+  }
 }

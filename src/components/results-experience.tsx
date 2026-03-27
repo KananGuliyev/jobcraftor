@@ -32,15 +32,17 @@ export function ResultsExperience({
       <div className="premium-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-xs uppercase tracking-[0.24em] text-sky/78">Results experience</p>
+            <p className="eyebrow-label">Results experience</p>
             {demoHighlights ? (
-              <span className="rounded-full border border-mint/25 bg-mint/10 px-3 py-1 text-xs uppercase tracking-[0.16em] text-mint">
+              <span className="status-badge-success">
                 {demoHighlights.badge}
               </span>
             ) : null}
           </div>
-          <h1 className="font-display text-3xl font-semibold text-sand sm:text-4xl">Your JobCraftor dashboard</h1>
-          <p className="max-w-3xl text-sm leading-7 text-mist/72">
+          <h1 className="font-display text-3xl font-semibold tracking-[-0.03em] text-sand sm:text-4xl">
+            Your JobCraftor dashboard
+          </h1>
+          <p className="max-w-3xl text-sm leading-7 text-mist/68">
             {demoHighlights
               ? `This instant sample walkthrough shows how JobCraftor turns a realistic ${demoHighlights.subtitle} into a focused action plan.`
               : "This is the focused, full-width readout designed for the demo moment: scan the role, understand the fit, and walk away with a concrete plan."}
@@ -59,17 +61,17 @@ export function ResultsExperience({
 
       <div className="premium-card p-5 sm:p-6">
         {error ? (
-          <div className="mb-5 rounded-[20px] border border-ember/30 bg-ember/10 px-4 py-3 text-sm text-orange-100">
+          <div className="mb-5 rounded-[20px] border border-ember/30 bg-ember/10 px-4 py-3 text-sm leading-7 text-orange-100">
             {error}
           </div>
         ) : null}
         {!error && !isLoading && meta?.source === "mock_fallback" && meta.notice ? (
-          <div className="mb-5 rounded-[20px] border border-sunrise/30 bg-sunrise/10 px-4 py-3 text-sm text-sand">
+          <div className="mb-5 rounded-[20px] border border-sunrise/30 bg-sunrise/10 px-4 py-3 text-sm leading-7 text-sand">
             {meta.notice}
           </div>
         ) : null}
         {!error && !isLoading && meta?.source === "demo" && meta.notice ? (
-          <div className="mb-5 rounded-[20px] border border-mint/25 bg-mint/10 px-4 py-3 text-sm text-sand">
+          <div className="mb-5 rounded-[20px] border border-mint/25 bg-mint/10 px-4 py-3 text-sm leading-7 text-sand">
             {meta.notice}
           </div>
         ) : null}
