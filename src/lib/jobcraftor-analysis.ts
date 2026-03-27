@@ -200,7 +200,29 @@ function getPriorityGaps(jobPosting: string, resume: string): GapItem[] {
     return explicit.slice(0, 3);
   }
 
-  return [...explicit, ...inferKeywordGaps(jobPosting, resume)].slice(0, 3);
+  const combined = [...explicit, ...inferKeywordGaps(jobPosting, resume)].slice(0, 3);
+
+  if (combined.length > 0) {
+    return combined;
+  }
+
+  return [
+    {
+      title: "Role-specific proof",
+      detail: "Your application needs one clearer piece of evidence that maps directly to the job's highest-priority work.",
+      strength: "high",
+    },
+    {
+      title: "Outcome framing",
+      detail: "Recruiters will look for metrics, ownership, and evidence of impact rather than generic responsibility descriptions.",
+      strength: "medium",
+    },
+    {
+      title: "Focused positioning",
+      detail: "The story needs to feel tailored to this role instead of broad enough to fit any application.",
+      strength: "low",
+    },
+  ];
 }
 
 function getMatchedSkills(jobPosting: string, resume: string) {
@@ -264,15 +286,15 @@ function buildStrengths(matchedSkills: string[], proofPoints: string[]) {
   const strengths = matchedSkills.map((skill) => `You already show overlap in ${skill.toLowerCase()}.`);
   const proofBased = proofPoints.slice(0, 2).map((point) => `Resume evidence: ${point}`);
 
-  return [...strengths, ...proofBased].slice(0, 4);
+  return [...strengths, ...proofBased].slice(0, 4).filter(Boolean);
 }
 
 function buildGaps(priorityGaps: GapItem[]) {
-  return priorityGaps.map((gap) => `${gap.title}: ${gap.detail}`).slice(0, 4);
+  return priorityGaps.map((gap) => `${gap.title}: ${gap.detail}`).slice(0, 4).filter(Boolean);
 }
 
 function buildBlockers(priorityGaps: GapItem[]): BlockerItem[] {
-  return priorityGaps.map((gap) => ({
+  return priorityGaps.slice(0, 3).map((gap) => ({
     title: gap.title,
     whyItMatters: gap.detail,
     priority: gap.strength,
@@ -436,10 +458,10 @@ function getNetworkingMessage(companyHint: string, roleTitle: string, topStrengt
 }
 
 export function analyzeJobCraftor(input: AnalyzeJobCraftorInput): JobCraftorResult {
-  const jobPostingText = input.jobPostingText.trim() || `Role sourced from ${input.jobPostingUrl ?? "a shared link"}`;
-  const resumeText = input.resumeText.trim();
-  const targetRole = input.targetRole?.trim();
-  const formattedDeadline = formatDeadline(input.deadline?.trim());
+  const jobPostingText = input.jobPostingText ?? `Role sourced from ${input.jobPostingUrl ?? "a shared link"}`;
+  const resumeText = input.resumeText;
+  const targetRole = input.targetRole;
+  const formattedDeadline = formatDeadline(input.deadline);
 
   const matchedSkills = getMatchedSkills(jobPostingText, resumeText);
   const priorityGaps = getPriorityGaps(jobPostingText, resumeText);

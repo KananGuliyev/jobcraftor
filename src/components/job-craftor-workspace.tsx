@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { demoInput } from "@/data/demo-content";
-import type { AnalyzeJobCraftorInput, JobCraftorResult } from "@/types/jobcraftor";
+import type { AnalyzeJobCraftorInput, JobCraftorAnalysisResponse, JobCraftorResult } from "@/types/jobcraftor";
 import { AppHeader } from "./app-header";
 import { Hero } from "./hero";
 import { InputPanel } from "./input-panel";
@@ -106,7 +106,7 @@ export function JobCraftorWorkspace() {
 
   function handleLoadDemo() {
     setFormValues({
-      jobPostingText: demoInput.jobPostingText,
+      jobPostingText: demoInput.jobPostingText ?? "",
       jobPostingUrl: demoInput.jobPostingUrl ?? "",
       resumeText: demoInput.resumeText,
       targetRole: demoInput.targetRole ?? "",
@@ -165,7 +165,7 @@ export function JobCraftorWorkspace() {
         body: JSON.stringify(payload),
       });
 
-      const body = (await response.json()) as { error?: string; result?: JobCraftorResult };
+      const body = (await response.json()) as Partial<JobCraftorAnalysisResponse> & { error?: string };
 
       if (!response.ok || !body.result) {
         throw new Error(body.error ?? "JobCraftor could not generate a result.");
