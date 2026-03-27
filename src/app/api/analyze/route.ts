@@ -19,8 +19,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: getValidationMessage(parsedInput.error) }, { status: 400 });
     }
 
-    const result = analyzeJobCraftor(parsedInput.data);
-    const responseBody = jobCraftorAnalysisResponseSchema.parse({ result });
+    const responseBody = jobCraftorAnalysisResponseSchema.parse(await analyzeJobCraftor(parsedInput.data));
 
     return NextResponse.json(responseBody);
   } catch {

@@ -6,7 +6,7 @@ export function ResultsLoadingState() {
         <h2 className="font-display text-4xl font-semibold text-sand sm:text-5xl">Building your full results dashboard</h2>
         <p className="max-w-2xl text-base leading-8 text-mist/75">
           JobCraftor is reading the role, mapping strengths and gaps, and assembling the dedicated dashboard from the
-          mock analysis route.
+          server-side analysis engine.
         </p>
       </div>
 

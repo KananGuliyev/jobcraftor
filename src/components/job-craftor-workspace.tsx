@@ -2,7 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { demoInput } from "@/data/demo-content";
-import type { AnalyzeJobCraftorInput, JobCraftorAnalysisResponse, JobCraftorResult } from "@/types/jobcraftor";
+import type {
+  AnalyzeJobCraftorInput,
+  JobCraftorAnalysisMeta,
+  JobCraftorAnalysisResponse,
+  JobCraftorResult,
+} from "@/types/jobcraftor";
 import { AppHeader } from "./app-header";
 import { Hero } from "./hero";
 import { InputPanel } from "./input-panel";
@@ -84,6 +89,7 @@ export function JobCraftorWorkspace() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [result, setResult] = useState<JobCraftorResult | null>(null);
+  const [analysisMeta, setAnalysisMeta] = useState<JobCraftorAnalysisMeta | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [activeView, setActiveView] = useState<"workspace" | "results">("workspace");
@@ -119,12 +125,14 @@ export function JobCraftorWorkspace() {
     });
     setFieldErrors({});
     setSubmissionError(null);
+    setAnalysisMeta(null);
   }
 
   function handleReset() {
     setFormValues(emptyForm);
     setUploadState(defaultUploadState);
     setResult(null);
+    setAnalysisMeta(null);
     setFieldErrors({});
     setSubmissionError(null);
     setIsGenerating(false);
@@ -152,6 +160,7 @@ export function JobCraftorWorkspace() {
     setFieldErrors({});
     setSubmissionError(null);
     setResult(null);
+    setAnalysisMeta(null);
     setIsGenerating(true);
     setActiveView("results");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -167,12 +176,13 @@ export function JobCraftorWorkspace() {
 
       const body = (await response.json()) as Partial<JobCraftorAnalysisResponse> & { error?: string };
 
-      if (!response.ok || !body.result) {
+      if (!response.ok || !body.result || !body.meta) {
         throw new Error(body.error ?? "JobCraftor could not generate a result.");
       }
 
       startTransition(() => {
         setResult(body.result ?? null);
+        setAnalysisMeta(body.meta ?? null);
       });
     } catch (caughtError) {
       const message = caughtError instanceof Error ? caughtError.message : "Something went wrong while analyzing the role.";
@@ -311,6 +321,7 @@ PDF parsing is not wired yet, so JobCraftor is storing this upload as placeholde
           <ResultsExperience
             isLoading={isGenerating || isPending}
             result={result}
+            meta={analysisMeta}
             error={submissionError}
             onBackToWorkflow={handleBackToWorkflow}
             onReset={handleReset}

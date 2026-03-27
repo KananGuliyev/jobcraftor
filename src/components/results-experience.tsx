@@ -1,4 +1,4 @@
-import type { JobCraftorResult } from "@/types/jobcraftor";
+import type { JobCraftorAnalysisMeta, JobCraftorResult } from "@/types/jobcraftor";
 import { ResultsEmptyState } from "./results-empty-state";
 import { ResultsLoadingState } from "./results-loading-state";
 import { ResultsPanel } from "./results-panel";
@@ -6,12 +6,13 @@ import { ResultsPanel } from "./results-panel";
 interface ResultsExperienceProps {
   isLoading: boolean;
   result: JobCraftorResult | null;
+  meta: JobCraftorAnalysisMeta | null;
   error: string | null;
   onBackToWorkflow: () => void;
   onReset: () => void;
 }
 
-export function ResultsExperience({ isLoading, result, error, onBackToWorkflow, onReset }: ResultsExperienceProps) {
+export function ResultsExperience({ isLoading, result, meta, error, onBackToWorkflow, onReset }: ResultsExperienceProps) {
   return (
     <section className="grid gap-6" id="results-experience">
       <div className="premium-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
@@ -38,6 +39,11 @@ export function ResultsExperience({ isLoading, result, error, onBackToWorkflow, 
         {error ? (
           <div className="mb-5 rounded-[20px] border border-ember/30 bg-ember/10 px-4 py-3 text-sm text-orange-100">
             {error}
+          </div>
+        ) : null}
+        {!error && !isLoading && meta?.source === "mock_fallback" && meta.notice ? (
+          <div className="mb-5 rounded-[20px] border border-sunrise/30 bg-sunrise/10 px-4 py-3 text-sm text-sand">
+            {meta.notice}
           </div>
         ) : null}
         {isLoading ? <ResultsLoadingState /> : null}

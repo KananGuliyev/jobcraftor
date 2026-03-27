@@ -75,6 +75,14 @@ export const interviewPrepItemSchema = z.object({
   whatTheyAreTesting: z.string().min(1),
 });
 
+export const analysisSourceSchema = z.enum(["ai", "mock_fallback"]);
+
+export const jobCraftorAnalysisMetaSchema = z.object({
+  source: analysisSourceSchema,
+  notice: z.string().min(1).optional(),
+  model: z.string().min(1).optional(),
+});
+
 export const jobInputSchema = z
   .object({
     jobPostingText: optionalTrimmedString(),
@@ -124,6 +132,7 @@ export const jobCraftorResultSchema = z.object({
 
 export const jobCraftorAnalysisResponseSchema = z.object({
   result: jobCraftorResultSchema,
+  meta: jobCraftorAnalysisMetaSchema,
 });
 
 export type GapStrength = z.infer<typeof gapStrengthSchema>;
@@ -135,8 +144,10 @@ export type FitAnalysis = z.infer<typeof fitAnalysisSchema>;
 export type BlockerItem = z.infer<typeof blockerSchema>;
 export type ResumeImprovements = z.infer<typeof resumeImprovementsSchema>;
 export type InterviewPrepItem = z.infer<typeof interviewPrepItemSchema>;
+export type AnalysisSource = z.infer<typeof analysisSourceSchema>;
 export type JobInput = z.infer<typeof jobInputSchema>;
 export type ResumeInput = z.infer<typeof resumeInputSchema>;
 export type AnalyzeJobCraftorInput = z.infer<typeof analyzeJobCraftorInputSchema>;
+export type JobCraftorAnalysisMeta = z.infer<typeof jobCraftorAnalysisMetaSchema>;
 export type JobCraftorResult = z.infer<typeof jobCraftorResultSchema>;
 export type JobCraftorAnalysisResponse = z.infer<typeof jobCraftorAnalysisResponseSchema>;
