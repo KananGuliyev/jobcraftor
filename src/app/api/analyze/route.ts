@@ -10,7 +10,20 @@ export async function POST(request: Request) {
       jobPostingUrl: payload.jobPostingUrl?.trim() ?? "",
       resumeText: payload.resumeText?.trim() ?? "",
       resumeFileName: payload.resumeFileName?.trim() ?? null,
+      targetRole: payload.targetRole?.trim() ?? "",
+      deadline: payload.deadline?.trim() ?? "",
     };
+
+    if (input.jobPostingUrl) {
+      try {
+        new URL(input.jobPostingUrl);
+      } catch {
+        return NextResponse.json(
+          { error: "Add a valid job URL or leave that field empty." },
+          { status: 400 },
+        );
+      }
+    }
 
     if (!input.jobPostingText && !input.jobPostingUrl) {
       return NextResponse.json(

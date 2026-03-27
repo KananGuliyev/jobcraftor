@@ -1,107 +1,211 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState, type DragEvent } from "react";
+
+interface UploadState {
+  fileName: string | null;
+  sourceLabel: string | null;
+  helperText: string;
+}
+
+interface FieldErrors {
+  jobPostingText?: string;
+  jobPostingUrl?: string;
+  resumeText?: string;
+  targetRole?: string;
+  deadline?: string;
+}
 
 interface InputPanelProps {
-  jobPostingText: string;
-  jobPostingUrl: string;
-  resumeText: string;
-  resumeFileName: string | null;
+  values: {
+    jobPostingText: string;
+    jobPostingUrl: string;
+    resumeText: string;
+    targetRole: string;
+    deadline: string;
+  };
+  uploadState: UploadState;
   isLoading: boolean;
-  error: string | null;
-  onJobPostingTextChange: (value: string) => void;
-  onJobPostingUrlChange: (value: string) => void;
-  onResumeTextChange: (value: string) => void;
+  submissionError: string | null;
+  fieldErrors: FieldErrors;
+  onChange: (field: "jobPostingText" | "jobPostingUrl" | "resumeText" | "targetRole" | "deadline", value: string) => void;
   onAnalyze: () => void;
   onLoadDemo: () => void;
   onReset: () => void;
   onUpload: (file: File) => void;
 }
 
+function fieldClass(hasError: boolean) {
+  return hasError ? "field-input field-input-error" : "field-input";
+}
+
+function areaClass(hasError: boolean) {
+  return hasError ? "field-area field-input-error" : "field-area";
+}
+
+function FieldMessage({ error, help }: { error?: string; help: string }) {
+  return <p className={`text-sm ${error ? "text-orange-100" : "text-mist/60"}`}>{error ?? help}</p>;
+}
+
 export function InputPanel({
-  jobPostingText,
-  jobPostingUrl,
-  resumeText,
-  resumeFileName,
+  values,
+  uploadState,
   isLoading,
-  error,
-  onJobPostingTextChange,
-  onJobPostingUrlChange,
-  onResumeTextChange,
+  submissionError,
+  fieldErrors,
+  onChange,
   onAnalyze,
   onLoadDemo,
   onReset,
   onUpload,
 }: InputPanelProps) {
   const inputId = useId();
+  const [isDragging, setIsDragging] = useState(false);
+
+  function handleDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+    const file = event.dataTransfer.files?.[0];
+
+    if (file) {
+      onUpload(file);
+    }
+  }
 
   return (
-    <section className="panel-surface p-5 sm:p-6" id="workflow">
+    <section className="premium-card p-5 sm:p-6" id="workflow">
       <div className="flex flex-col gap-4 border-b border-white/10 pb-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.28em] text-sky/80">Input workspace</p>
-          <h2 className="font-display text-2xl font-semibold text-sand">Build one strong application strategy</h2>
-          <p className="section-copy">
-            Paste the posting or drop in the URL, then add the resume. The first pass runs on mock server analysis
-            so the whole workflow works before AI integration.
+          <h2 className="font-display text-3xl font-semibold text-sand">Generate a stronger application plan</h2>
+          <p className="section-copy max-w-2xl">
+            Paste the role, add your resume, and optionally include a target role or deadline. The current workflow
+            returns polished mock analysis so the full product experience works before live AI parsing is added.
           </p>
         </div>
         <div className="flex flex-wrap gap-2" id="demo">
-          <button
-            type="button"
-            onClick={onLoadDemo}
-            className="rounded-full border border-sky/20 bg-sky/10 px-4 py-2 text-sm font-medium text-sand transition hover:-translate-y-0.5"
-          >
-            Try demo
+          <button type="button" onClick={onLoadDemo} className="button-secondary">
+            Autofill sample data
           </button>
-          <button
-            type="button"
-            onClick={onReset}
-            className="rounded-full border border-white/10 px-4 py-2 text-sm font-medium text-mist/80 transition hover:-translate-y-0.5"
-          >
-            Clear
+          <button type="button" onClick={onReset} className="button-secondary">
+            Clear form
           </button>
         </div>
       </div>
 
-      <div className="mt-5 grid gap-5">
-        <label className="grid gap-3">
-          <span className="text-sm font-semibold text-sand">1. Job posting text</span>
-          <textarea
-            value={jobPostingText}
-            onChange={(event) => onJobPostingTextChange(event.target.value)}
-            className="field-area"
-            placeholder="Paste the full posting here. Responsibilities, mission, requirements, and preferred qualifications all help."
-          />
-        </label>
+      <div className="mt-6 grid gap-6">
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <label className="grid gap-3">
+            <span className="text-sm font-semibold text-sand">Job description</span>
+            <textarea
+              value={values.jobPostingText}
+              onChange={(event) => onChange("jobPostingText", event.target.value)}
+              className={areaClass(Boolean(fieldErrors.jobPostingText))}
+              placeholder={`Example:\nProduct Marketing Intern\nResponsibilities include owning campaign research, supporting launch briefs, and analyzing conversion performance for student-facing products.`}
+            />
+            <FieldMessage
+              error={fieldErrors.jobPostingText}
+              help="Paste the role text here. Responsibilities, requirements, and preferred qualifications all help."
+            />
+          </label>
 
-        <label className="grid gap-3">
-          <span className="text-sm font-semibold text-sand">Or add a job posting URL</span>
-          <input
-            type="url"
-            value={jobPostingUrl}
-            onChange={(event) => onJobPostingUrlChange(event.target.value)}
-            className="field-input"
-            placeholder="https://company.com/jobs/product-operations-intern"
-          />
-          <span className="text-sm text-mist/60">
-            In this mock-first scaffold, the URL is stored and used as source context until live fetching is added.
-          </span>
-        </label>
+          <div className="grid gap-5">
+            <label className="grid gap-3">
+              <span className="text-sm font-semibold text-sand">Job URL</span>
+              <input
+                type="url"
+                value={values.jobPostingUrl}
+                onChange={(event) => onChange("jobPostingUrl", event.target.value)}
+                className={fieldClass(Boolean(fieldErrors.jobPostingUrl))}
+                placeholder="https://company.com/careers/product-operations-intern"
+              />
+              <FieldMessage
+                error={fieldErrors.jobPostingUrl}
+                help="Optional for now. If present, it must be a valid URL."
+              />
+            </label>
 
-        <div className="grid gap-3">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <span className="text-sm font-semibold text-sand">2. Resume</span>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <label className="grid gap-3">
+                <span className="text-sm font-semibold text-sand">Target role</span>
+                <input
+                  type="text"
+                  value={values.targetRole}
+                  onChange={(event) => onChange("targetRole", event.target.value)}
+                  className={fieldClass(Boolean(fieldErrors.targetRole))}
+                  placeholder="Product Operations Intern"
+                />
+                <FieldMessage
+                  error={fieldErrors.targetRole}
+                  help="Optional. Use this if you want the plan framed around a specific role title."
+                />
+              </label>
+
+              <label className="grid gap-3">
+                <span className="text-sm font-semibold text-sand">Deadline</span>
+                <input
+                  type="date"
+                  value={values.deadline}
+                  onChange={(event) => onChange("deadline", event.target.value)}
+                  className={fieldClass(Boolean(fieldErrors.deadline))}
+                />
+                <FieldMessage
+                  error={fieldErrors.deadline}
+                  help="Optional. Adds urgency and timing cues to the mock 7-day plan."
+                />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[0.88fr_1.12fr]">
+          <div className="grid gap-3">
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-sand">Resume upload</span>
+              <span className="text-sm text-mist/60">Supports `.txt`, `.md`, `.rtf`, and `.pdf` for placeholder-ready parsing.</span>
+            </div>
+
             <label
               htmlFor={inputId}
-              className="inline-flex w-fit cursor-pointer rounded-full border border-sky/20 bg-sky/10 px-4 py-2 text-sm font-medium text-sand transition hover:-translate-y-0.5"
+              onDragOver={(event) => {
+                event.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+              className={`dropzone-surface cursor-pointer ${isDragging ? "border-sky/45 bg-sky/10" : ""} ${
+                fieldErrors.resumeText ? "border-ember/45 bg-ember/5" : ""
+              }`}
             >
-              Upload plain-text resume
+              <div className="flex h-full flex-col justify-between gap-5">
+                <div className="space-y-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/6 text-lg text-sand">+</div>
+                  <div className="space-y-2">
+                    <h3 className="font-display text-2xl font-semibold text-sand">Drop your resume here</h3>
+                    <p className="text-sm leading-7 text-mist/72">
+                      Drag and drop a file, or click to browse. PDFs are accepted now with placeholder handling so
+                      better parsing can be added later without changing the workflow.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-[20px] border border-white/10 bg-white/5 px-4 py-3 text-sm text-mist/72">
+                  {uploadState.fileName ? (
+                    <>
+                      <span className="font-semibold text-sand">{uploadState.fileName}</span>
+                      <span className="block mt-1">{uploadState.helperText}</span>
+                    </>
+                  ) : (
+                    "No file uploaded yet. Text pasting still works, even if you upload a file."
+                  )}
+                </div>
+              </div>
             </label>
+
             <input
               id={inputId}
               type="file"
-              accept=".txt,.md,.rtf,text/plain,text/markdown,application/rtf"
+              accept=".txt,.md,.rtf,.pdf,text/plain,text/markdown,application/rtf,application/pdf"
               className="hidden"
               onChange={(event) => {
                 const file = event.target.files?.[0];
@@ -111,32 +215,37 @@ export function InputPanel({
               }}
             />
           </div>
-          <textarea
-            value={resumeText}
-            onChange={(event) => onResumeTextChange(event.target.value)}
-            className="field-area"
-            placeholder="Paste your resume text, or upload a plain-text file for the demo."
-          />
-          <div className="flex flex-col gap-1 text-sm text-mist/65 sm:flex-row sm:items-center sm:justify-between">
-            <span>{resumeFileName ? `Loaded: ${resumeFileName}` : "No file uploaded yet"}</span>
-            <span>Tip: include projects, leadership, metrics, and concrete outcomes.</span>
-          </div>
+
+          <label className="grid gap-3">
+            <span className="text-sm font-semibold text-sand">Resume text</span>
+            <textarea
+              value={values.resumeText}
+              onChange={(event) => onChange("resumeText", event.target.value)}
+              className={areaClass(Boolean(fieldErrors.resumeText))}
+              placeholder={`Example:\nAva Patel\nEconomics and Information Science student\n- Product intern who improved onboarding completion by 18%\n- Built dashboards to track conversion and weekly engagement`}
+            />
+            <FieldMessage
+              error={fieldErrors.resumeText}
+              help="Paste resume text directly, or let an uploaded text-based file populate this field automatically."
+            />
+          </label>
         </div>
 
-        {error ? (
+        {submissionError ? (
           <div className="rounded-[20px] border border-ember/30 bg-ember/10 px-4 py-3 text-sm text-orange-100">
-            {error}
+            {submissionError}
           </div>
         ) : null}
 
-        <button
-          type="button"
-          onClick={onAnalyze}
-          disabled={isLoading}
-          className="rounded-full bg-gradient-to-r from-sunrise to-ember px-5 py-3 text-sm font-semibold text-slate-900 transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70"
-        >
-          {isLoading ? "Generating your plan..." : "Analyze role and generate plan"}
-        </button>
+        <div className="flex flex-col gap-3 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="max-w-2xl text-sm leading-7 text-mist/62">
+            JobCraftor uses mock analysis on this screen today, but the input contract is structured for richer resume
+            parsing and live AI analysis next.
+          </p>
+          <button type="button" onClick={onAnalyze} disabled={isLoading} className="button-primary min-w-[220px]">
+            {isLoading ? "Generating your plan..." : "Generate Plan"}
+          </button>
+        </div>
       </div>
     </section>
   );

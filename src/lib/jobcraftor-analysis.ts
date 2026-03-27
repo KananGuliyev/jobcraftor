@@ -103,6 +103,24 @@ function extractRoleTitle(jobPostingText: string) {
   return firstLine && firstLine.length < 70 ? firstLine : "Target role";
 }
 
+function formatDeadline(deadline?: string) {
+  if (!deadline) {
+    return null;
+  }
+
+  const parsed = new Date(`${deadline}T12:00:00`);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return deadline;
+  }
+
+  return parsed.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 function extractCompanyHint(jobPostingUrl?: string) {
   if (!jobPostingUrl) {
     return "Target company";
@@ -268,9 +286,10 @@ function getInterviewPrompts(priorityGaps: GapItem[], matchedSkills: string[]) {
   ];
 }
 
-function getSevenDayPlan(priorityGaps: GapItem[], matchedSkills: string[]): PlanDay[] {
+function getSevenDayPlan(priorityGaps: GapItem[], matchedSkills: string[], deadline?: string): PlanDay[] {
   const primaryGap = priorityGaps[0]?.title ?? "role-specific proof";
   const topStrength = matchedSkills[0] ?? "cross-functional execution";
+  const formattedDeadline = formatDeadline(deadline);
 
   return [
     {
@@ -311,6 +330,7 @@ function getSevenDayPlan(priorityGaps: GapItem[], matchedSkills: string[]): Plan
         "Write a short outreach note or cover letter opener tailored to the company mission.",
         "Mirror the job language in your headline, top bullets, and project framing.",
         "Prepare a thirty-second answer to why this team and why now.",
+        formattedDeadline ? `Set your application package to final by ${formattedDeadline}.` : "Choose a target submit date and work backward from it.",
       ],
     },
     {
@@ -340,7 +360,9 @@ function getSevenDayPlan(priorityGaps: GapItem[], matchedSkills: string[]): Plan
       tasks: [
         "Check formatting, links, dates, and company-specific language one last time.",
         "Submit the application and save the role notes for follow-up prep.",
-        "Schedule a short review in three days to prepare for recruiter outreach.",
+        formattedDeadline
+          ? `Submit before ${formattedDeadline} and schedule a short follow-up prep block three days later.`
+          : "Schedule a short review in three days to prepare for recruiter outreach.",
       ],
     },
   ];
@@ -353,15 +375,17 @@ function getNetworkingMessage(companyHint: string, roleTitle: string, topStrengt
 export function analyzeJobCraftor(input: AnalyzeJobCraftorInput): JobCraftorResult {
   const jobPostingText = input.jobPostingText.trim() || `Role sourced from ${input.jobPostingUrl ?? "a shared link"}`;
   const resumeText = input.resumeText.trim();
+  const targetRole = input.targetRole?.trim();
+  const formattedDeadline = formatDeadline(input.deadline?.trim());
 
   const matchedSkills = getMatchedSkills(jobPostingText, resumeText);
   const priorityGaps = getPriorityGaps(jobPostingText, resumeText);
   const proofPoints = getProofPoints(resumeText);
   const rewrites = getRewrites(priorityGaps);
   const interviewPrompts = getInterviewPrompts(priorityGaps, matchedSkills);
-  const sevenDayPlan = getSevenDayPlan(priorityGaps, matchedSkills);
+  const sevenDayPlan = getSevenDayPlan(priorityGaps, matchedSkills, input.deadline);
   const roleBreakdown = buildRoleBreakdown(jobPostingText);
-  const roleTitle = extractRoleTitle(jobPostingText);
+  const roleTitle = targetRole || extractRoleTitle(jobPostingText);
   const companyHint = extractCompanyHint(input.jobPostingUrl);
 
   const score = Math.max(
@@ -381,19 +405,29 @@ export function analyzeJobCraftor(input: AnalyzeJobCraftorInput): JobCraftorResu
       ? "Your background already overlaps with the role. The highest-leverage move is making that overlap more specific and easier to spot."
       : "You have enough raw signal to apply, but you need tighter proof and a more role-specific story around the biggest gaps.";
 
+  const summaryWithContext = [
+    summary,
+    targetRole ? `The plan is tuned toward the ${targetRole} path.` : null,
+    formattedDeadline ? `Your application deadline is treated as ${formattedDeadline}, so the week plan is framed around that timeline.` : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return {
     roleTitle,
     companyHint,
     score,
     verdict,
-    summary,
+    summary: summaryWithContext,
     roleBreakdown,
     matchedSkills,
     priorityGaps,
     quickWins: [
       "Tailor the top third of the resume to the exact language of the role.",
       "Replace generic collaboration phrases with ownership, evidence, and outcomes.",
-      "Bring one role-relevant artifact or metric into your interview prep.",
+      formattedDeadline
+        ? `Work backward from ${formattedDeadline} so your strongest proof is ready before you submit.`
+        : "Bring one role-relevant artifact or metric into your interview prep.",
     ],
     proofPoints,
     rewrites,

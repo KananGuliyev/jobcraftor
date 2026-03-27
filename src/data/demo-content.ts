@@ -2,6 +2,8 @@ import type { AnalyzeJobCraftorInput } from "@/types/jobcraftor";
 
 export const demoInput: AnalyzeJobCraftorInput = {
   jobPostingUrl: "https://jobs.example.com/product-operations-intern",
+  targetRole: "Product Operations Intern",
+  deadline: "2026-04-02",
   jobPostingText: `Product Operations Intern
 
 About the role

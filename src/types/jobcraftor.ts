@@ -34,6 +34,8 @@ export interface AnalyzeJobCraftorInput {
   jobPostingUrl?: string;
   resumeText: string;
   resumeFileName?: string | null;
+  targetRole?: string;
+  deadline?: string;
 }
 
 export interface JobCraftorResult {
