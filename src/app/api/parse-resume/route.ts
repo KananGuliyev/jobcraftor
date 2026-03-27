@@ -12,7 +12,10 @@ export async function POST(request: Request) {
 
     if (!(uploaded instanceof File)) {
       console.warn("[JobCraftor][parse-resume] missing file upload");
-      return NextResponse.json({ error: "Upload a resume file so JobCraftor can extract the text." }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Upload a resume file so JobCraftor can extract the text." },
+        { status: 400 },
+      );
     }
 
     const responseBody = parseResumeSuccessSchema.parse(await parseResumeFile(uploaded));
@@ -20,12 +23,15 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof ResumeParseError) {
       console.warn("[JobCraftor][parse-resume] parse failed:", error.message);
-      return NextResponse.json({ error: error.message }, { status: error.status });
+      return NextResponse.json({ success: false, error: error.message }, { status: error.status });
     }
 
     console.error("[JobCraftor][parse-resume] unexpected failure:", error);
     return NextResponse.json(
-      { error: "JobCraftor could not parse that resume file. Please try another file or paste the resume text directly." },
+      {
+        success: false,
+        error: "JobCraftor could not parse that file. Please try another upload or paste the resume text directly.",
+      },
       { status: 500 },
     );
   }

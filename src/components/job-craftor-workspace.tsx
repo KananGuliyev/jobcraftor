@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { demoHighlights, demoInput, demoMeta, demoResult } from "@/data/demo-content";
+import { JobCraftorApiError, readJsonApiResponse } from "@/lib/api-client";
 import {
   clearJobCraftorDebugEvents,
   clearJobCraftorSavedHistory,
@@ -28,11 +29,10 @@ import {
 } from "@/lib/jobcraftor-workspace";
 import type {
   JobCraftorAnalysisMeta,
-  JobCraftorAnalysisResponse,
   JobCraftorHistoryEntry,
   JobCraftorResult,
-  ParseResumeSuccess,
 } from "@/types/jobcraftor";
+import { jobCraftorAnalysisResponseSchema, parseResumeSuccessSchema } from "@/types/jobcraftor";
 import { AppHeader } from "./app-header";
 import { DiagnosticsPanel } from "./diagnostics-panel";
 import { HistoryPanel } from "./history-panel";
@@ -43,6 +43,8 @@ import { ResultsExperience } from "./results-experience";
 import { SectionHeading } from "./section-heading";
 
 export function JobCraftorWorkspace() {
+  const genericRequestError =
+    "We couldn't process that file or request. Please try again or paste your resume text directly.";
   const [formValues, setFormValues] = useState<WorkspaceFormValues>(emptyWorkspaceFormValues);
   const [uploadState, setUploadState] = useState<WorkspaceUploadState>(defaultWorkspaceUploadState);
   const [fieldErrors, setFieldErrors] = useState<WorkspaceFieldErrors>({});
@@ -178,11 +180,11 @@ export function JobCraftorWorkspace() {
         body: JSON.stringify(payload),
       });
 
-      const body = (await response.json()) as Partial<JobCraftorAnalysisResponse> & { error?: string };
-
-      if (!response.ok || !body.result || !body.meta) {
-        throw new Error(body.error ?? "JobCraftor could not generate a result.");
-      }
+      const body = await readJsonApiResponse(
+        response,
+        jobCraftorAnalysisResponseSchema,
+        "We couldn't process that request. Please try again or refresh the sample/demo input.",
+      );
 
       setHistoryEntries(saveJobCraftorLocalAnalysis(payload, body.result, body.meta));
 
@@ -191,7 +193,10 @@ export function JobCraftorWorkspace() {
         setAnalysisMeta(body.meta ?? null);
       });
     } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : "Something went wrong while analyzing the role.";
+      const message =
+        caughtError instanceof JobCraftorApiError || caughtError instanceof Error
+          ? caughtError.message
+          : "We couldn't process that request. Please try again or refresh the sample/demo input.";
       setTelemetryEvents(recordJobCraftorLocalEvent("analysis_failed", message));
       setSubmissionError(message);
     } finally {
@@ -223,11 +228,7 @@ export function JobCraftorWorkspace() {
         body: formData,
       });
 
-      const body = (await response.json()) as Partial<ParseResumeSuccess> & { error?: string };
-
-      if (!response.ok || !body.text || !body.meta) {
-        throw new Error(body.error ?? "JobCraftor could not parse that resume file.");
-      }
+      const body = await readJsonApiResponse(response, parseResumeSuccessSchema, genericRequestError);
 
       setFormValues((current) => ({
         ...current,
@@ -237,7 +238,10 @@ export function JobCraftorWorkspace() {
       setFieldErrors((current) => ({ ...current, resumeText: undefined }));
       setSubmissionError(null);
     } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : "JobCraftor could not parse that resume file.";
+      const message =
+        caughtError instanceof JobCraftorApiError || caughtError instanceof Error
+          ? caughtError.message
+          : genericRequestError;
       setTelemetryEvents(recordJobCraftorLocalEvent("parsing_failed", message));
       setSubmissionError(message);
       setFieldErrors((current) => ({
