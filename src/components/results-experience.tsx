@@ -1,0 +1,49 @@
+import type { JobCraftorResult } from "@/types/jobcraftor";
+import { ResultsEmptyState } from "./results-empty-state";
+import { ResultsLoadingState } from "./results-loading-state";
+import { ResultsPanel } from "./results-panel";
+
+interface ResultsExperienceProps {
+  isLoading: boolean;
+  result: JobCraftorResult | null;
+  error: string | null;
+  onBackToWorkflow: () => void;
+  onReset: () => void;
+}
+
+export function ResultsExperience({ isLoading, result, error, onBackToWorkflow, onReset }: ResultsExperienceProps) {
+  return (
+    <section className="grid gap-6" id="results-experience">
+      <div className="premium-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.24em] text-sky/78">Results experience</p>
+          <h1 className="font-display text-3xl font-semibold text-sand sm:text-4xl">Your JobCraftor dashboard</h1>
+          <p className="max-w-3xl text-sm leading-7 text-mist/72">
+            This is the focused, full-width readout designed for the demo moment: scan the role, understand the fit,
+            and walk away with a concrete plan.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <button type="button" onClick={onBackToWorkflow} className="button-secondary">
+            Back to inputs
+          </button>
+          <button type="button" onClick={onReset} className="button-secondary">
+            Start over
+          </button>
+        </div>
+      </div>
+
+      <div className="premium-card p-5 sm:p-6">
+        {error ? (
+          <div className="mb-5 rounded-[20px] border border-ember/30 bg-ember/10 px-4 py-3 text-sm text-orange-100">
+            {error}
+          </div>
+        ) : null}
+        {isLoading ? <ResultsLoadingState /> : null}
+        {!isLoading && result ? <ResultsPanel result={result} /> : null}
+        {!isLoading && !result ? <ResultsEmptyState /> : null}
+      </div>
+    </section>
+  );
+}

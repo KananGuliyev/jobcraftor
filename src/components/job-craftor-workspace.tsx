@@ -7,8 +7,7 @@ import { AppHeader } from "./app-header";
 import { Hero } from "./hero";
 import { InputPanel } from "./input-panel";
 import { ResultsEmptyState } from "./results-empty-state";
-import { ResultsLoadingState } from "./results-loading-state";
-import { ResultsPanel } from "./results-panel";
+import { ResultsExperience } from "./results-experience";
 import { SectionHeading } from "./section-heading";
 
 type FormField = "jobPostingText" | "jobPostingUrl" | "resumeText" | "targetRole" | "deadline";
@@ -87,6 +86,7 @@ export function JobCraftorWorkspace() {
   const [result, setResult] = useState<JobCraftorResult | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [activeView, setActiveView] = useState<"workspace" | "results">("workspace");
 
   const completion = Math.round(
     ([
@@ -128,6 +128,7 @@ export function JobCraftorWorkspace() {
     setFieldErrors({});
     setSubmissionError(null);
     setIsGenerating(false);
+    setActiveView("workspace");
   }
 
   async function handleAnalyze() {
@@ -152,6 +153,8 @@ export function JobCraftorWorkspace() {
     setSubmissionError(null);
     setResult(null);
     setIsGenerating(true);
+    setActiveView("results");
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
     try {
       const response = await fetch("/api/analyze", {
@@ -229,6 +232,13 @@ PDF parsing is not wired yet, so JobCraftor is storing this upload as placeholde
     document.getElementById("workflow")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function handleBackToWorkflow() {
+    setActiveView("workspace");
+    window.setTimeout(() => {
+      scrollToWorkflow();
+    }, 40);
+  }
+
   function handleTryDemo() {
     handleLoadDemo();
     window.setTimeout(() => {
@@ -244,53 +254,68 @@ PDF parsing is not wired yet, so JobCraftor is storing this upload as placeholde
       <AppHeader />
 
       <div className="landing-shell">
-        <Hero onPrimaryCta={scrollToWorkflow} onSecondaryCta={handleTryDemo} />
+        {activeView === "workspace" ? (
+          <>
+            <Hero onPrimaryCta={scrollToWorkflow} onSecondaryCta={handleTryDemo} />
 
-        <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-          <div className="space-y-6">
-            <div className="premium-card p-5 sm:p-6">
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                <SectionHeading
-                  eyebrow="Workflow progress"
-                  title={`${completion}% complete`}
-                  description="Add the role, your resume, and optional application context, then generate a structured dashboard from the mock analysis route."
-                />
-                <div className="w-full max-w-xs space-y-2">
-                  <div className="h-3 overflow-hidden rounded-full bg-white/10">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-sunrise to-sky transition-all"
-                      style={{ width: `${completion}%` }}
+            <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+              <div className="space-y-6">
+                <div className="premium-card p-5 sm:p-6">
+                  <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                    <SectionHeading
+                      eyebrow="Workflow progress"
+                      title={`${completion}% complete`}
+                      description="Add the role, your resume, and optional application context, then generate a structured dashboard from the mock analysis route."
                     />
-                  </div>
-                  <div className="flex items-center justify-between text-xs uppercase tracking-[0.18em] text-mist/60">
-                    <span>Inputs</span>
-                    <span>Analysis</span>
-                    <span>Plan</span>
+                    <div className="w-full max-w-xs space-y-3">
+                      <div className="h-3 overflow-hidden rounded-full bg-white/10">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-sunrise to-sky transition-all"
+                          style={{ width: `${completion}%` }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between text-xs uppercase tracking-[0.18em] text-mist/60">
+                        <span>Inputs</span>
+                        <span>Analysis</span>
+                        <span>Plan</span>
+                      </div>
+                      {result ? (
+                        <button type="button" onClick={() => setActiveView("results")} className="button-secondary w-full">
+                          Open latest dashboard
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
+
+                <InputPanel
+                  values={formValues}
+                  uploadState={uploadState}
+                  isLoading={isGenerating || isPending}
+                  submissionError={submissionError}
+                  fieldErrors={fieldErrors}
+                  onChange={updateField}
+                  onAnalyze={handleAnalyze}
+                  onLoadDemo={handleLoadDemo}
+                  onReset={handleReset}
+                  onUpload={handleUpload}
+                />
               </div>
-            </div>
 
-            <InputPanel
-              values={formValues}
-              uploadState={uploadState}
-              isLoading={isGenerating || isPending}
-              submissionError={submissionError}
-              fieldErrors={fieldErrors}
-              onChange={updateField}
-              onAnalyze={handleAnalyze}
-              onLoadDemo={handleLoadDemo}
-              onReset={handleReset}
-              onUpload={handleUpload}
-            />
-          </div>
-
-          <section className="premium-card p-5 sm:p-6">
-            {isGenerating || isPending ? <ResultsLoadingState /> : null}
-            {!isGenerating && !isPending && result ? <ResultsPanel result={result} /> : null}
-            {!isGenerating && !isPending && !result ? <ResultsEmptyState /> : null}
-          </section>
-        </section>
+              <section className="premium-card p-5 sm:p-6">
+                <ResultsEmptyState />
+              </section>
+            </section>
+          </>
+        ) : (
+          <ResultsExperience
+            isLoading={isGenerating || isPending}
+            result={result}
+            error={submissionError}
+            onBackToWorkflow={handleBackToWorkflow}
+            onReset={handleReset}
+          />
+        )}
       </div>
     </main>
   );

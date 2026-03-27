@@ -24,9 +24,33 @@ export interface PlanDay {
   tasks: string[];
 }
 
-export interface RoleBreakdownItem {
+export interface RoleBreakdownSection {
+  responsibilities: string[];
+  keySkills: string[];
+  whatMattersMost: string[];
+}
+
+export interface FitAnalysis {
+  score: number;
+  verdict: string;
+  strengths: string[];
+  gaps: string[];
+}
+
+export interface BlockerItem {
   title: string;
-  detail: string;
+  whyItMatters: string;
+  priority: GapStrength;
+}
+
+export interface ResumeImprovements {
+  rewrites: ResumeRewrite[];
+  keywordRecommendations: string[];
+}
+
+export interface InterviewPrepItem {
+  question: string;
+  whatTheyAreTesting: string;
 }
 
 export interface AnalyzeJobCraftorInput {
@@ -41,16 +65,12 @@ export interface AnalyzeJobCraftorInput {
 export interface JobCraftorResult {
   roleTitle: string;
   companyHint: string;
-  score: number;
-  verdict: string;
   summary: string;
-  roleBreakdown: RoleBreakdownItem[];
-  matchedSkills: string[];
-  priorityGaps: GapItem[];
-  quickWins: string[];
-  proofPoints: string[];
-  rewrites: ResumeRewrite[];
-  networkingMessage: string;
-  interviewPrompts: InterviewPrompt[];
+  roleBreakdown: RoleBreakdownSection;
+  fitAnalysis: FitAnalysis;
+  blockers: BlockerItem[];
   sevenDayPlan: PlanDay[];
+  resumeImprovements: ResumeImprovements;
+  networkingMessage: string;
+  interviewPrep: InterviewPrepItem[];
 }

@@ -1,11 +1,14 @@
 import type {
   AnalyzeJobCraftorInput,
+  BlockerItem,
   GapItem,
   GapStrength,
+  InterviewPrepItem,
   JobCraftorResult,
   PlanDay,
+  ResumeImprovements,
   ResumeRewrite,
-  RoleBreakdownItem,
+  RoleBreakdownSection,
 } from "@/types/jobcraftor";
 
 const roleSignals = [
@@ -135,46 +138,43 @@ function extractCompanyHint(jobPostingUrl?: string) {
   }
 }
 
-function buildRoleBreakdown(jobPostingText: string): RoleBreakdownItem[] {
-  const cleanJob = normalize(jobPostingText);
+function extractResponsibilities(jobPostingText: string) {
+  const lines = jobPostingText
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
 
-  const explicit = roleSignals
-    .filter((signal) => hasSignal(cleanJob, signal.aliases))
-    .slice(0, 4)
-    .map((signal) => ({
-      title: signal.title,
-      detail: signal.detail,
-    }));
+  const bullets = lines
+    .filter((line) => line.startsWith("-"))
+    .map((line) => line.replace(/^-+\s*/, ""))
+    .slice(0, 4);
 
-  if (explicit.length >= 3) {
-    return explicit;
+  if (bullets.length >= 3) {
+    return bullets;
   }
 
-  const fallback = [
-    {
-      title: "Execution support",
-      detail: "The role needs someone who can move from ambiguity to a clear, organized plan.",
-    },
-    {
-      title: "Communication",
-      detail: "Written synthesis and concise updates will likely matter as much as raw analysis.",
-    },
-    {
-      title: "Outcome focus",
-      detail: "You will need to connect your work to measurable impact, not just activity.",
-    },
+  return [
+    "Translate the posting into a clear role scorecard before applying.",
+    "Show concrete proof for the most important work this team expects.",
+    "Frame your story around impact, not just participation.",
   ];
+}
 
-  return [...explicit, ...fallback].slice(0, 4);
+function getRoleKeywords(jobPostingText: string) {
+  return Array.from(
+    new Set(
+      normalize(jobPostingText)
+        .split(/\s+/)
+        .filter((word) => word.length > 4 && !stopWords.has(word)),
+    ),
+  );
 }
 
 function inferKeywordGaps(jobPosting: string, resume: string): GapItem[] {
-  const roleWords = normalize(jobPosting)
-    .split(/\s+/)
-    .filter((word) => word.length > 4 && !stopWords.has(word));
+  const roleWords = getRoleKeywords(jobPosting);
   const resumeText = normalize(resume);
 
-  return Array.from(new Set(roleWords))
+  return roleWords
     .filter((word) => !resumeText.includes(word))
     .slice(0, 3)
     .map((word, index) => ({
@@ -230,6 +230,55 @@ function getProofPoints(resume: string) {
   return bullets.map((bullet) => bullet.replace(/^-+\s*/, ""));
 }
 
+function buildRoleBreakdown(jobPostingText: string, matchedSkills: string[], gaps: GapItem[]): RoleBreakdownSection {
+  const cleanJob = normalize(jobPostingText);
+  const responsibilities = extractResponsibilities(jobPostingText);
+
+  const explicitSkills = roleSignals
+    .filter((signal) => hasSignal(cleanJob, signal.aliases))
+    .map((signal) => signal.title)
+    .slice(0, 5);
+
+  const fallbackSkills = getRoleKeywords(jobPostingText).slice(0, 5).map(toTitleCase);
+
+  const keySkills = (explicitSkills.length > 0 ? explicitSkills : fallbackSkills).slice(0, 5);
+
+  const whatMattersMost = [
+    matchedSkills[0]
+      ? `Lead with ${matchedSkills[0].toLowerCase()} because it is already supported by your background.`
+      : "Lead with the strongest evidence you already have and make it easy to spot.",
+    gaps[0]
+      ? `Close the ${gaps[0].title.toLowerCase()} gap first because it is most likely to create recruiter hesitation.`
+      : "Focus on clarity, relevance, and proof instead of trying to cover everything at once.",
+    "Use metrics, ownership, and cross-functional context to make your story feel more credible.",
+  ];
+
+  return {
+    responsibilities,
+    keySkills,
+    whatMattersMost,
+  };
+}
+
+function buildStrengths(matchedSkills: string[], proofPoints: string[]) {
+  const strengths = matchedSkills.map((skill) => `You already show overlap in ${skill.toLowerCase()}.`);
+  const proofBased = proofPoints.slice(0, 2).map((point) => `Resume evidence: ${point}`);
+
+  return [...strengths, ...proofBased].slice(0, 4);
+}
+
+function buildGaps(priorityGaps: GapItem[]) {
+  return priorityGaps.map((gap) => `${gap.title}: ${gap.detail}`).slice(0, 4);
+}
+
+function buildBlockers(priorityGaps: GapItem[]): BlockerItem[] {
+  return priorityGaps.map((gap) => ({
+    title: gap.title,
+    whyItMatters: gap.detail,
+    priority: gap.strength,
+  }));
+}
+
 function getRewrites(priorityGaps: GapItem[]): ResumeRewrite[] {
   const templates: ResumeRewrite[] = [
     {
@@ -261,27 +310,41 @@ function getRewrites(priorityGaps: GapItem[]): ResumeRewrite[] {
   }));
 }
 
-function getInterviewPrompts(priorityGaps: GapItem[], matchedSkills: string[]) {
+function getKeywordRecommendations(jobPosting: string, resume: string, matchedSkills: string[], gaps: GapItem[]) {
+  const resumeText = normalize(resume);
+  const fromSignals = roleSignals
+    .filter((signal) => !matchedSkills.includes(signal.title) && hasSignal(normalize(jobPosting), signal.aliases))
+    .map((signal) => signal.title);
+
+  const fromKeywords = getRoleKeywords(jobPosting)
+    .filter((word) => !resumeText.includes(word))
+    .slice(0, 4)
+    .map(toTitleCase);
+
+  return Array.from(new Set([...fromSignals, ...gaps.map((gap) => gap.title), ...fromKeywords])).slice(0, 6);
+}
+
+function getInterviewPrep(priorityGaps: GapItem[], matchedSkills: string[]): InterviewPrepItem[] {
   return [
     {
       question: "Tell me about a time you turned an ambiguous problem into a concrete execution plan.",
-      rationale: "This role values structured thinking when goals are still fuzzy.",
+      whatTheyAreTesting: "Whether you can structure uncertainty and move from ambiguity to action.",
     },
     {
       question: "How would you know whether onboarding or engagement improved after a product change?",
-      rationale: "The posting suggests that metrics literacy matters.",
+      whatTheyAreTesting: "Metrics literacy, product judgment, and your ability to define success clearly.",
     },
     {
       question: priorityGaps[0]
         ? `How are you actively building confidence in ${priorityGaps[0].title.toLowerCase()}?`
         : "What capability are you trying to strengthen most right now, and how?",
-      rationale: "A strong growth answer can reduce concern about your biggest blocker.",
+      whatTheyAreTesting: "Self-awareness, growth mindset, and whether your biggest gap is being addressed intentionally.",
     },
     {
       question: matchedSkills[0]
         ? `What is your best example of ${matchedSkills[0].toLowerCase()} driving a better outcome?`
         : "What experience best proves you can succeed in this role?",
-      rationale: "Guide the interview toward your strongest evidence early.",
+      whatTheyAreTesting: "The strongest proof you can offer and how well you connect your work to outcomes.",
     },
   ];
 }
@@ -369,7 +432,7 @@ function getSevenDayPlan(priorityGaps: GapItem[], matchedSkills: string[], deadl
 }
 
 function getNetworkingMessage(companyHint: string, roleTitle: string, topStrength: string, topGap: string) {
-  return `Hi, I’m applying for the ${roleTitle} role at ${companyHint} and your team’s blend of execution and user impact stood out to me. I’ve already built experience around ${topStrength.toLowerCase()}, and I’m actively strengthening ${topGap.toLowerCase()} through targeted project work. If you have any advice on what separates strong candidates for this role, I’d love to learn from your perspective.`;
+  return `Hi, I'm applying for the ${roleTitle} role at ${companyHint} and your team's blend of execution and user impact stood out to me. I've already built experience around ${topStrength.toLowerCase()}, and I'm actively strengthening ${topGap.toLowerCase()} through targeted project work. If you have any advice on what separates strong candidates for this role, I'd love to learn from your perspective.`;
 }
 
 export function analyzeJobCraftor(input: AnalyzeJobCraftorInput): JobCraftorResult {
@@ -381,10 +444,13 @@ export function analyzeJobCraftor(input: AnalyzeJobCraftorInput): JobCraftorResu
   const matchedSkills = getMatchedSkills(jobPostingText, resumeText);
   const priorityGaps = getPriorityGaps(jobPostingText, resumeText);
   const proofPoints = getProofPoints(resumeText);
-  const rewrites = getRewrites(priorityGaps);
-  const interviewPrompts = getInterviewPrompts(priorityGaps, matchedSkills);
+  const roleBreakdown = buildRoleBreakdown(jobPostingText, matchedSkills, priorityGaps);
+  const resumeImprovements: ResumeImprovements = {
+    rewrites: getRewrites(priorityGaps),
+    keywordRecommendations: getKeywordRecommendations(jobPostingText, resumeText, matchedSkills, priorityGaps),
+  };
+  const interviewPrep = getInterviewPrep(priorityGaps, matchedSkills);
   const sevenDayPlan = getSevenDayPlan(priorityGaps, matchedSkills, input.deadline);
-  const roleBreakdown = buildRoleBreakdown(jobPostingText);
   const roleTitle = targetRole || extractRoleTitle(jobPostingText);
   const companyHint = extractCompanyHint(input.jobPostingUrl);
 
@@ -400,13 +466,13 @@ export function analyzeJobCraftor(input: AnalyzeJobCraftorInput): JobCraftorResu
         ? "Promising fit with targeted gaps"
         : "Early fit that needs sharper positioning";
 
-  const summary =
+  const summaryBase =
     matchedSkills.length >= priorityGaps.length
       ? "Your background already overlaps with the role. The highest-leverage move is making that overlap more specific and easier to spot."
       : "You have enough raw signal to apply, but you need tighter proof and a more role-specific story around the biggest gaps.";
 
-  const summaryWithContext = [
-    summary,
+  const summary = [
+    summaryBase,
     targetRole ? `The plan is tuned toward the ${targetRole} path.` : null,
     formattedDeadline ? `Your application deadline is treated as ${formattedDeadline}, so the week plan is framed around that timeline.` : null,
   ]
@@ -416,28 +482,23 @@ export function analyzeJobCraftor(input: AnalyzeJobCraftorInput): JobCraftorResu
   return {
     roleTitle,
     companyHint,
-    score,
-    verdict,
-    summary: summaryWithContext,
+    summary,
     roleBreakdown,
-    matchedSkills,
-    priorityGaps,
-    quickWins: [
-      "Tailor the top third of the resume to the exact language of the role.",
-      "Replace generic collaboration phrases with ownership, evidence, and outcomes.",
-      formattedDeadline
-        ? `Work backward from ${formattedDeadline} so your strongest proof is ready before you submit.`
-        : "Bring one role-relevant artifact or metric into your interview prep.",
-    ],
-    proofPoints,
-    rewrites,
+    fitAnalysis: {
+      score,
+      verdict,
+      strengths: buildStrengths(matchedSkills, proofPoints),
+      gaps: buildGaps(priorityGaps),
+    },
+    blockers: buildBlockers(priorityGaps),
+    sevenDayPlan,
+    resumeImprovements,
     networkingMessage: getNetworkingMessage(
       companyHint,
       roleTitle,
       matchedSkills[0] ?? "cross-functional execution",
       priorityGaps[0]?.title ?? "role-specific proof",
     ),
-    interviewPrompts,
-    sevenDayPlan,
+    interviewPrep,
   };
 }
