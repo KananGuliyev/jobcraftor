@@ -75,7 +75,7 @@ export const interviewPrepItemSchema = z.object({
   whatTheyAreTesting: z.string().min(1),
 });
 
-export const analysisSourceSchema = z.enum(["ai", "mock_fallback"]);
+export const analysisSourceSchema = z.enum(["ai", "mock_fallback", "demo"]);
 export const resumeUploadFormatSchema = z.enum(["txt", "md", "rtf", "pdf", "docx"]);
 
 export const jobCraftorAnalysisMetaSchema = z.object({

@@ -61,7 +61,7 @@ export function Hero({ onPrimaryCta, onSecondaryCta }: HeroProps) {
               Start with your posting
             </button>
             <button type="button" onClick={onSecondaryCta} className="button-secondary">
-              Try the demo flow
+              Try instant demo
             </button>
           </div>
 

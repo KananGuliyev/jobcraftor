@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { demoInput } from "@/data/demo-content";
+import { demoHighlights, demoInput, demoMeta, demoResult } from "@/data/demo-content";
 import { normalizeResumeText } from "@/lib/resume-text";
 import type {
   AnalyzeJobCraftorInput,
@@ -128,11 +128,35 @@ export function JobCraftorWorkspace() {
       fileName: demoInput.resumeFileName ?? null,
       format: "txt",
       sourceLabel: "Sample dataset",
-      helperText: "Sample resume content has been loaded so the demo can run immediately.",
+      helperText: "Sample software engineering internship content has been loaded for the contest demo.",
     });
     setFieldErrors({});
     setSubmissionError(null);
     setAnalysisMeta(null);
+  }
+
+  function launchInstantDemo() {
+    setFormValues({
+      jobPostingText: demoInput.jobPostingText ?? "",
+      jobPostingUrl: demoInput.jobPostingUrl ?? "",
+      resumeText: demoInput.resumeText,
+      targetRole: demoInput.targetRole ?? "",
+      deadline: demoInput.deadline ?? "",
+    });
+    setUploadState({
+      fileName: demoInput.resumeFileName ?? null,
+      format: "txt",
+      sourceLabel: "Instant demo dataset",
+      helperText: "This sample software engineering internship package is ready to explore immediately.",
+    });
+    setFieldErrors({});
+    setSubmissionError(null);
+    setResult(demoResult);
+    setAnalysisMeta(demoMeta);
+    setIsGenerating(false);
+    setIsUploading(false);
+    setActiveView("results");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function handleReset() {
@@ -267,10 +291,7 @@ export function JobCraftorWorkspace() {
   }
 
   function handleTryDemo() {
-    handleLoadDemo();
-    window.setTimeout(() => {
-      scrollToWorkflow();
-    }, 40);
+    launchInstantDemo();
   }
 
   return (
@@ -341,6 +362,7 @@ export function JobCraftorWorkspace() {
             result={result}
             meta={analysisMeta}
             error={submissionError}
+            demoHighlights={analysisMeta?.source === "demo" ? demoHighlights : null}
             onBackToWorkflow={handleBackToWorkflow}
             onReset={handleReset}
           />
