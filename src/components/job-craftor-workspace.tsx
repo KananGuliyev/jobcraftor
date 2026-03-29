@@ -44,7 +44,7 @@ import { SectionHeading } from "./section-heading";
 
 export function JobCraftorWorkspace() {
   const genericRequestError =
-    "We couldn't process that file or request. Please try again or paste your resume text directly.";
+    "We couldn't process that file or request. Please try again, use a different file export, or paste your resume text directly.";
   const [formValues, setFormValues] = useState<WorkspaceFormValues>(emptyWorkspaceFormValues);
   const [uploadState, setUploadState] = useState<WorkspaceUploadState>(defaultWorkspaceUploadState);
   const [fieldErrors, setFieldErrors] = useState<WorkspaceFieldErrors>({});
@@ -180,11 +180,12 @@ export function JobCraftorWorkspace() {
         body: JSON.stringify(payload),
       });
 
-      const body = await readJsonApiResponse(
+      const body = await readJsonApiResponse({
         response,
-        jobCraftorAnalysisResponseSchema,
-        "We couldn't process that request. Please try again or refresh the sample/demo input.",
-      );
+        schema: jobCraftorAnalysisResponseSchema,
+        endpoint: "/api/analyze",
+        fallbackMessage: "We couldn't generate your plan right now. Please try again or refresh the sample/demo input.",
+      });
 
       setHistoryEntries(saveJobCraftorLocalAnalysis(payload, body.result, body.meta));
 
@@ -228,7 +229,12 @@ export function JobCraftorWorkspace() {
         body: formData,
       });
 
-      const body = await readJsonApiResponse(response, parseResumeSuccessSchema, genericRequestError);
+      const body = await readJsonApiResponse({
+        response,
+        schema: parseResumeSuccessSchema,
+        endpoint: "/api/parse-resume",
+        fallbackMessage: genericRequestError,
+      });
 
       setFormValues((current) => ({
         ...current,

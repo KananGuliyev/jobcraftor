@@ -21,11 +21,12 @@ describe("readJsonApiResponse", () => {
     );
 
     await expect(
-      readJsonApiResponse(
+      readJsonApiResponse({
         response,
-        parseResumeSuccessSchema,
-        "We couldn't process that file or request. Please try again or paste your resume text directly.",
-      ),
+        schema: parseResumeSuccessSchema,
+        endpoint: "/api/parse-resume",
+        fallbackMessage: "We couldn't process that file or request. Please try again or paste your resume text directly.",
+      }),
     ).resolves.toMatchObject({
       text: "Aria Kim\nBuilt a dashboard",
     });
@@ -38,11 +39,12 @@ describe("readJsonApiResponse", () => {
     });
 
     await expect(
-      readJsonApiResponse(
+      readJsonApiResponse({
         response,
-        parseResumeSuccessSchema,
-        "We couldn't process that file or request. Please try again or paste your resume text directly.",
-      ),
+        schema: parseResumeSuccessSchema,
+        endpoint: "/api/parse-resume",
+        fallbackMessage: "We couldn't process that file or request. Please try again or paste your resume text directly.",
+      }),
     ).rejects.toEqual(
       expect.objectContaining<JobCraftorApiError>({
         message: "We couldn't process that file or request. Please try again or paste your resume text directly.",
@@ -63,11 +65,12 @@ describe("readJsonApiResponse", () => {
     );
 
     await expect(
-      readJsonApiResponse(
+      readJsonApiResponse({
         response,
-        parseResumeSuccessSchema,
-        "We couldn't process that file or request. Please try again or paste your resume text directly.",
-      ),
+        schema: parseResumeSuccessSchema,
+        endpoint: "/api/parse-resume",
+        fallbackMessage: "We couldn't process that file or request. Please try again or paste your resume text directly.",
+      }),
     ).rejects.toEqual(
       expect.objectContaining<JobCraftorApiError>({
         message: "Upload a resume file so JobCraftor can extract the text.",

@@ -1,5 +1,3 @@
-import mammoth from "mammoth";
-import { PDFParse } from "pdf-parse";
 import { normalizeResumeText } from "@/lib/resume-text";
 import type { ParseResumeSuccess, ResumeUploadFormat } from "@/types/jobcraftor";
 
@@ -24,11 +22,13 @@ const mimeToFormat = new Map<string, ResumeUploadFormat>([
 
 export class ResumeParseError extends Error {
   status: number;
+  code: string;
 
-  constructor(message: string, status = 400) {
+  constructor(message: string, status = 400, code = "UPLOAD_PARSE_ERROR") {
     super(message);
     this.name = "ResumeParseError";
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -42,7 +42,11 @@ function detectResumeFormat(file: File): ResumeUploadFormat {
   const extension = getFileExtension(file.name);
 
   if (extension === ".doc") {
-    throw new ResumeParseError("Legacy `.doc` files are not supported yet. Please upload a `.docx`, PDF, or paste the resume text.");
+    throw new ResumeParseError(
+      "Legacy `.doc` files are not supported yet. Please upload a `.docx`, PDF, or paste the resume text.",
+      415,
+      "UPLOAD_UNSUPPORTED_FILE_TYPE",
+    );
   }
 
   const fromExtension = supportedExtensions.get(extension);
@@ -59,16 +63,26 @@ function detectResumeFormat(file: File): ResumeUploadFormat {
 
   throw new ResumeParseError(
     "Upload a supported resume file: `.txt`, `.md`, `.rtf`, `.pdf`, or `.docx`. You can also paste the resume text directly.",
+    415,
+    "UPLOAD_UNSUPPORTED_FILE_TYPE",
   );
 }
 
 function validateResumeFile(file: File) {
   if (!file.size) {
-    throw new ResumeParseError("The uploaded file is empty. Please choose a resume with readable content.");
+    throw new ResumeParseError(
+      "The uploaded file is empty. Please choose a resume with readable content.",
+      400,
+      "UPLOAD_EMPTY_FILE",
+    );
   }
 
   if (file.size > MAX_RESUME_BYTES) {
-    throw new ResumeParseError("The uploaded file is too large. Please use a resume under 5 MB or paste the text directly.");
+    throw new ResumeParseError(
+      "The uploaded file is too large. Please use a resume under 5 MB or paste the text directly.",
+      413,
+      "UPLOAD_FILE_TOO_LARGE",
+    );
   }
 }
 
@@ -98,6 +112,7 @@ function extractTextFromRtf(rtfText: string) {
 }
 
 async function parsePdf(buffer: Buffer) {
+  const { PDFParse } = await import("pdf-parse");
   const parser = new PDFParse({ data: buffer });
 
   try {
@@ -109,7 +124,9 @@ async function parsePdf(buffer: Buffer) {
 }
 
 async function parseDocx(buffer: Buffer) {
-  const result = await mammoth.extractRawText({ buffer });
+  const mammothModule = await import("mammoth");
+  const parser = mammothModule.default ?? mammothModule;
+  const result = await parser.extractRawText({ buffer });
   return result.value;
 }
 
@@ -172,6 +189,8 @@ export async function parseResumeFile(file: File): Promise<ParseResumeSuccess> {
   } catch {
     throw new ResumeParseError(
       `JobCraftor could not read this ${format.toUpperCase()} file. Please try a cleaner export, a different format, or paste the resume text directly.`,
+      422,
+      "UPLOAD_PARSE_ERROR",
     );
   }
 
@@ -180,6 +199,8 @@ export async function parseResumeFile(file: File): Promise<ParseResumeSuccess> {
   if (!text) {
     throw new ResumeParseError(
       "JobCraftor could not extract readable text from that file. Try another export, copy the resume into plain text, or paste it directly.",
+      422,
+      "UPLOAD_NO_READABLE_TEXT",
     );
   }
 

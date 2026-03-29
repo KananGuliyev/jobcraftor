@@ -34,8 +34,15 @@ export const planDaySchema = z.object({
 
 export const analysisSourceSchema = z.enum(["ai", "mock_fallback", "demo"]);
 
+export const apiErrorResponseSchema = z.object({
+  success: z.literal(false),
+  error: z.string().min(1),
+  code: z.string().min(1),
+});
+
 export type GapStrength = z.infer<typeof gapStrengthSchema>;
 export type GapItem = z.infer<typeof gapItemSchema>;
 export type ResumeRewrite = z.infer<typeof resumeRewriteSchema>;
 export type PlanDay = z.infer<typeof planDaySchema>;
 export type AnalysisSource = z.infer<typeof analysisSourceSchema>;
+export type ApiErrorResponse = z.infer<typeof apiErrorResponseSchema>;

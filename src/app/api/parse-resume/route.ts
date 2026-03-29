@@ -5,34 +5,58 @@ import { parseResumeFile, ResumeParseError } from "@/lib/services/resume-parser"
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+function createErrorResponse(status: number, error: string, code: string) {
+  return NextResponse.json({ success: false, error, code }, { status });
+}
+
 export async function POST(request: Request) {
   try {
+    const contentType = request.headers.get("content-type")?.toLowerCase() ?? "";
+
+    if (!contentType.includes("multipart/form-data")) {
+      console.warn("[JobCraftor][parse-resume] invalid content type:", contentType || "<missing>");
+      return createErrorResponse(
+        400,
+        "JobCraftor expected a resume upload in multipart form data. Please try uploading the file again.",
+        "UPLOAD_INVALID_REQUEST",
+      );
+    }
+
     const formData = await request.formData();
     const uploaded = formData.get("file");
 
     if (!(uploaded instanceof File)) {
       console.warn("[JobCraftor][parse-resume] missing file upload");
-      return NextResponse.json(
-        { success: false, error: "Upload a resume file so JobCraftor can extract the text." },
-        { status: 400 },
+      return createErrorResponse(
+        400,
+        "Upload a resume file so JobCraftor can extract the text.",
+        "UPLOAD_MISSING_FILE",
       );
     }
+
+    console.info("[JobCraftor][parse-resume] parsing upload", {
+      fileName: uploaded.name,
+      fileType: uploaded.type || "<missing>",
+      fileSize: uploaded.size,
+    });
 
     const responseBody = parseResumeSuccessSchema.parse(await parseResumeFile(uploaded));
     return NextResponse.json(responseBody);
   } catch (error) {
     if (error instanceof ResumeParseError) {
-      console.warn("[JobCraftor][parse-resume] parse failed:", error.message);
-      return NextResponse.json({ success: false, error: error.message }, { status: error.status });
+      console.warn("[JobCraftor][parse-resume] parse failed:", {
+        code: error.code,
+        status: error.status,
+        message: error.message,
+      });
+      return createErrorResponse(error.status, error.message, error.code);
     }
 
     console.error("[JobCraftor][parse-resume] unexpected failure:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: "JobCraftor could not parse that file. Please try another upload or paste the resume text directly.",
-      },
-      { status: 500 },
+    return createErrorResponse(
+      500,
+      "JobCraftor could not parse that file. Please try another upload or paste the resume text directly.",
+      "UPLOAD_UNEXPECTED_ERROR",
     );
   }
 }

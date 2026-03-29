@@ -81,7 +81,17 @@ npm install
 
 ### Configure environment
 
-Copy `.env.example` to `.env.local`.
+Copy `.env.example` to `.env.local` in the project root:
+
+```bash
+cp .env.example .env.local
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env.local
+```
 
 Available environment variables:
 
@@ -89,6 +99,11 @@ Available environment variables:
 | --- | --- | --- |
 | `OPENAI_API_KEY` | No | Enables live AI analysis. If missing, JobCraftor falls back to the validated mock engine. |
 | `OPENAI_MODEL` | No | Optional model override. Defaults to `gpt-4o-mini`. |
+
+Important:
+- `.env.local` should live at the repository root: [JobCraftor](C:\Users\kenan\OneDrive\İş masası\JobCraftor)
+- after adding or changing `OPENAI_API_KEY` or `OPENAI_MODEL`, restart `npm run dev`
+- `OPENAI_MODEL` is optional; if omitted, JobCraftor uses `gpt-4o-mini`
 
 ### Run locally
 
@@ -123,6 +138,14 @@ At a high level, JobCraftor uses a server-side structured analysis pipeline:
 5. If live AI fails or is unavailable, JobCraftor falls back to a deterministic mock analysis engine so the product still works reliably
 
 This keeps API keys server-side, keeps the frontend contract stable, and makes the app safer to demo.
+
+### How to verify live AI is working
+
+1. Add `OPENAI_API_KEY` to `.env.local`
+2. Restart the dev server
+3. Submit a real analysis from the input workflow
+4. Confirm the results header shows `Live AI analysis` instead of `Validated fallback`
+5. Confirm the dashboard does not show the fallback warning about missing live AI configuration
 
 ## Demo Mode
 

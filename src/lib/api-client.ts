@@ -1,4 +1,5 @@
 import type { ZodType } from "zod";
+import { apiErrorResponseSchema } from "@/types/jobcraftor";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -19,23 +20,33 @@ function isJsonResponse(response: Response) {
 
 export class JobCraftorApiError extends Error {
   status: number;
+  code?: string;
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, code?: string) {
     super(message);
     this.name = "JobCraftorApiError";
     this.status = status;
+    this.code = code;
   }
 }
 
+interface ReadJsonApiResponseOptions<T> {
+  response: Response;
+  schema: ZodType<T>;
+  fallbackMessage: string;
+  endpoint: string;
+}
+
 export async function readJsonApiResponse<T>(
-  response: Response,
-  schema: ZodType<T>,
-  fallbackMessage: string,
+  options: ReadJsonApiResponseOptions<T>,
 ): Promise<T> {
+  const { response, schema, fallbackMessage, endpoint } = options;
+
   if (!isJsonResponse(response)) {
     const responseText = await response.text().catch(() => "");
 
-    console.error("[JobCraftor][client] expected JSON response but received non-JSON content", {
+    console.warn("[JobCraftor][client] expected JSON response but received non-JSON content", {
+      endpoint,
       status: response.status,
       contentType: response.headers.get("content-type"),
       bodySnippet: responseText.slice(0, 160),
@@ -49,7 +60,8 @@ export async function readJsonApiResponse<T>(
   try {
     parsedBody = await response.json();
   } catch (error) {
-    console.error("[JobCraftor][client] failed to parse JSON response", {
+    console.warn("[JobCraftor][client] failed to parse JSON response", {
+      endpoint,
       status: response.status,
       contentType: response.headers.get("content-type"),
       error,
@@ -59,13 +71,20 @@ export async function readJsonApiResponse<T>(
   }
 
   if (!response.ok) {
-    throw new JobCraftorApiError(extractErrorMessage(parsedBody) ?? fallbackMessage, response.status);
+    const errorPayload = apiErrorResponseSchema.safeParse(parsedBody);
+
+    throw new JobCraftorApiError(
+      errorPayload.success ? errorPayload.data.error : extractErrorMessage(parsedBody) ?? fallbackMessage,
+      response.status,
+      errorPayload.success ? errorPayload.data.code : undefined,
+    );
   }
 
   const schemaResult = schema.safeParse(parsedBody);
 
   if (!schemaResult.success) {
-    console.error("[JobCraftor][client] response JSON did not match the expected schema", {
+    console.warn("[JobCraftor][client] response JSON did not match the expected schema", {
+      endpoint,
       status: response.status,
       issues: schemaResult.error.issues,
     });

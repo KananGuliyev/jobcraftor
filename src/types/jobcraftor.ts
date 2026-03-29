@@ -1,4 +1,5 @@
 export {
+  apiErrorResponseSchema,
   analysisSourceSchema,
   gapItemSchema,
   gapStrengthSchema,
@@ -6,6 +7,7 @@ export {
   planDaySchema,
   resumeRewriteSchema,
   trimString,
+  type ApiErrorResponse,
   type AnalysisSource,
   type GapItem,
   type GapStrength,
