@@ -14,9 +14,8 @@ export function ResultsEmptyState() {
           Your full application plan appears here
         </h2>
         <p className="max-w-2xl text-base leading-8 text-mist/70">
-          Launch the instant demo for the fastest walkthrough, or paste your own posting and resume text to open the
-          main JobCraftor moment: a dedicated dashboard built for faster applications, sharper outreach, and stronger
-          interview prep.
+          Launch the instant demo for the fastest walkthrough, or generate your own result to see the main JobCraftor
+          moment: a personalized path to becoming more competitive before you apply.
         </p>
       </div>
 

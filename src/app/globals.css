@@ -43,6 +43,13 @@ body {
   @apply rounded-[24px] border border-white/10 bg-ink/55;
 }
 
+.results-summary-panel {
+  @apply rounded-[32px] border border-white/10 bg-white/[0.05] shadow-soft;
+  background-image:
+    linear-gradient(135deg, rgb(140 212 255 / 0.08), transparent 34%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.03), rgb(255 255 255 / 0.015));
+}
+
 .landing-shell {
   @apply relative mx-auto flex max-w-[1380px] flex-col gap-16 px-4 py-6 sm:px-6 sm:py-8 xl:px-8;
 }
