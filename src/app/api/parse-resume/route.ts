@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       console.warn("[JobCraftor][parse-resume] invalid content type:", contentType || "<missing>");
       return createErrorResponse(
         400,
-        "JobCraftor expected a resume upload in multipart form data. Please try uploading the file again.",
+        "We couldn't read that upload request cleanly. Please try uploading the file again, or paste your resume text directly.",
         "UPLOAD_INVALID_REQUEST",
       );
     }
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       console.warn("[JobCraftor][parse-resume] missing file upload");
       return createErrorResponse(
         400,
-        "Upload a resume file so JobCraftor can extract the text.",
+        "Choose a resume file so JobCraftor can turn it into editable text.",
         "UPLOAD_MISSING_FILE",
       );
     }
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     console.error("[JobCraftor][parse-resume] unexpected failure:", error);
     return createErrorResponse(
       500,
-      "JobCraftor could not parse that file. Please try another upload or paste the resume text directly.",
+      "We couldn't prepare that file for review. Please try another upload or paste your resume text directly.",
       "UPLOAD_UNEXPECTED_ERROR",
     );
   }

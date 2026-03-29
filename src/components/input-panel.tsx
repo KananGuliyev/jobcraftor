@@ -150,9 +150,10 @@ export function InputPanel({
         <div className="grid gap-6 lg:grid-cols-[0.88fr_1.12fr]">
           <div className="grid gap-3">
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-semibold text-sand">Resume file</span>
+              <span className="text-sm font-semibold text-sand">Resume file (optional)</span>
               <span className="text-sm leading-6 text-mist/58">
-                Upload `TXT`, `MD`, `RTF`, `PDF`, or `DOCX` and JobCraftor will extract clean text for review.
+                Pasted resume text is the safest path. If you want to upload a file, `.docx` is the most reliable
+                format. PDF is supported, but some exports are harder to read cleanly.
               </span>
             </div>
 
@@ -174,27 +175,29 @@ export function InputPanel({
                     +
                   </div>
                   <div className="space-y-2">
-                    <h3 className="font-display text-2xl font-semibold tracking-[-0.02em] text-sand">Drop your resume here</h3>
+                    <h3 className="font-display text-2xl font-semibold tracking-[-0.02em] text-sand">
+                      Upload a resume if you need to
+                    </h3>
                     <p className="text-sm leading-7 text-mist/68">
-                      Drag and drop a file, or click to browse. The extracted text will appear in the editable field on
-                      the right.
+                      Drag and drop a file, or click to browse. For the cleanest demo, paste resume text directly or
+                      use a DOCX export. Any extracted text will appear in the editable field on the right.
                     </p>
                   </div>
                 </div>
 
                 <div className="surface-subtle px-4 py-3 text-sm text-mist/68">
                   {isUploading ? (
-                    "Parsing your resume and normalizing the extracted text..."
-                  ) : uploadState.fileName ? (
+                    "Preparing clean resume text for review..."
+                  ) : uploadState.fileName || uploadState.sourceLabel ? (
                     <>
                       {uploadState.sourceLabel ? (
                         <span className="status-badge-info mb-2 w-fit">{uploadState.sourceLabel}</span>
                       ) : null}
-                      <span className="font-semibold text-sand">{uploadState.fileName}</span>
-                      <span className="mt-1 block">{uploadState.helperText}</span>
+                      {uploadState.fileName ? <span className="font-semibold text-sand">{uploadState.fileName}</span> : null}
+                      <span className={`${uploadState.fileName ? "mt-1" : ""} block`}>{uploadState.helperText}</span>
                     </>
                   ) : (
-                    "No file uploaded yet. You can still paste resume text directly."
+                    "No file uploaded yet. Pasted resume text is ready whenever you are."
                   )}
                 </div>
               </div>
@@ -216,7 +219,7 @@ export function InputPanel({
           </div>
 
           <label className="grid gap-3">
-            <span className="text-sm font-semibold text-sand">Editable resume text</span>
+            <span className="text-sm font-semibold text-sand">Resume text (recommended)</span>
             <textarea
               value={values.resumeText}
               onChange={(event) => onChange("resumeText", event.target.value)}
@@ -225,7 +228,7 @@ export function InputPanel({
             />
             <FieldMessage
               error={fieldErrors.resumeText}
-              help="Paste resume text directly, or review and edit the extracted text after upload."
+              help="Recommended for live demos: paste your resume text here. If you upload a file, review and edit the extracted text before generating the plan."
             />
           </label>
         </div>
@@ -238,11 +241,11 @@ export function InputPanel({
 
         <div className="flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-2xl text-sm leading-7 text-mist/60">
-            Review the extracted resume text before generating the plan so the final analysis reflects what you want to
-            submit.
+            Safest manual flow: paste resume text, confirm the role, then generate the plan. If you upload a file,
+            review the extracted text before continuing.
           </p>
           <button type="button" onClick={onAnalyze} disabled={isLoading} className="button-primary min-w-[220px]">
-            {isUploading ? "Parsing resume..." : isLoading ? "Building your plan..." : "Generate action plan"}
+            {isUploading ? "Preparing resume text..." : isLoading ? "Building your plan..." : "Generate plan"}
           </button>
         </div>
       </div>

@@ -10,9 +10,9 @@ import {
 import { generateMockJobCraftorAnalysis } from "@/lib/services/jobcraftor-mock-engine";
 
 const fallbackNotice =
-  "Live AI analysis was unavailable for this run, so JobCraftor used its validated fallback engine to keep your plan ready.";
+  "Live AI was unavailable for this run, so JobCraftor used its validated fallback engine to keep your plan ready.";
 const missingApiKeyFallbackNotice =
-  "Live AI is not configured yet. Add OPENAI_API_KEY to .env.local, restart the dev server, and JobCraftor will use live AI instead of the fallback engine.";
+  "Live AI is not configured in this environment yet, so JobCraftor used its validated fallback engine to keep your plan ready.";
 
 function buildFallbackResponse(input: AnalyzeJobCraftorInput, notice = fallbackNotice): JobCraftorAnalysisResponse {
   return {

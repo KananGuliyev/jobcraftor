@@ -41,7 +41,7 @@ describe("POST /api/parse-resume", () => {
     expect(response.headers.get("content-type")).toContain("application/json");
     expect(body).toEqual({
       success: false,
-      error: "Upload a resume file so JobCraftor can extract the text.",
+      error: "Choose a resume file so JobCraftor can turn it into editable text.",
       code: "UPLOAD_MISSING_FILE",
     });
   });
@@ -68,7 +68,7 @@ describe("POST /api/parse-resume", () => {
     expect(response.headers.get("content-type")).toContain("application/json");
     expect(body).toEqual({
       success: false,
-      error: "JobCraftor expected a resume upload in multipart form data. Please try uploading the file again.",
+      error: "We couldn't read that upload request cleanly. Please try uploading the file again, or paste your resume text directly.",
       code: "UPLOAD_INVALID_REQUEST",
     });
   });

@@ -43,11 +43,11 @@ export const defaultWorkspaceUploadState: WorkspaceUploadState = {
   fileName: null,
   format: null,
   sourceLabel: null,
-  helperText: "No file uploaded yet.",
+  helperText: "No file uploaded yet. Pasted resume text is the safest path for live demos.",
 };
 
 export const unsupportedResumeFileError =
-  "Upload a `.txt`, `.md`, `.rtf`, `.pdf`, or `.docx` resume file, or paste the resume directly into the field.";
+  "That file type is not supported here. For the safest demo, paste your resume text or upload a `.docx` file.";
 
 function isValidUrl(value: string) {
   try {
@@ -109,7 +109,7 @@ export function buildParsedResumeUploadState(meta: ParseResumeMeta): WorkspaceUp
 
 export function isSupportedResumeUpload(fileName: string) {
   const extension = fileName.toLowerCase().split(".").pop() ?? "";
-  return ["txt", "md", "rtf", "pdf", "docx", "doc"].includes(extension);
+  return ["txt", "md", "rtf", "pdf", "docx"].includes(extension);
 }
 
 export function getWorkspaceFieldErrors(

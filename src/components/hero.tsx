@@ -22,7 +22,7 @@ const steps = [
   {
     number: "02",
     title: "Add your resume",
-    copy: "Paste or upload your current resume and let JobCraftor normalize it into clean text.",
+    copy: "Paste resume text for the safest path, or upload a DOCX file if you want JobCraftor to extract it for you.",
   },
   {
     number: "03",
@@ -51,22 +51,22 @@ export function Hero({ onPrimaryCta, onSecondaryCta }: HeroProps) {
               Turn any job posting into a personalized action plan.
             </h1>
             <p className="max-w-2xl text-base leading-8 text-mist/72 sm:text-lg">
-              Understand what the role is asking for, where your resume is weak, and what to fix before you apply.
+              Understand what the role is asking for, where your resume is weakest, and what to fix before you apply.
             </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <button type="button" onClick={onPrimaryCta} className="button-primary">
-              Start your plan
+              Launch instant demo
             </button>
             <button type="button" onClick={onSecondaryCta} className="button-secondary">
-              Launch instant demo
+              Start your own plan
             </button>
           </div>
 
           <p className="max-w-xl text-sm leading-7 text-mist/60">
-            Best first click for judges: launch the instant demo to open a polished software engineering internship
-            walkthrough immediately.
+            Fastest path for judges: launch the instant demo. Safest manual path: paste resume text or upload a DOCX
+            file.
           </p>
         </div>
 
@@ -99,13 +99,13 @@ export function Hero({ onPrimaryCta, onSecondaryCta }: HeroProps) {
                   <p className="section-label">Top blockers</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="status-badge-danger normal-case tracking-normal text-sm font-medium">
-                      SQL proof
+                      Backend proof
                     </span>
                     <span className="status-badge-warning normal-case tracking-normal text-sm font-medium">
-                      Metrics storytelling
+                      Debugging proof
                     </span>
                     <span className="status-badge-info normal-case tracking-normal text-sm font-medium text-sand">
-                      Product briefs
+                      Impact framing
                     </span>
                   </div>
                 </div>
@@ -152,6 +152,9 @@ export function Hero({ onPrimaryCta, onSecondaryCta }: HeroProps) {
           <p className="max-w-xl text-base leading-8 text-mist/70">
             The workflow is intentionally narrow: understand the role, compare it against your current story, and fix
             the gaps that matter most.
+          </p>
+          <p className="text-sm leading-7 text-mist/60">
+            For the cleanest live run, use pasted resume text or a DOCX resume instead of relying on a PDF export.
           </p>
         </div>
 

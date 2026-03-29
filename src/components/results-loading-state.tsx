@@ -10,6 +10,9 @@ export function ResultsLoadingState() {
           JobCraftor is reading the role, comparing it against your resume, and assembling the dashboard with fit,
           blockers, and next steps.
         </p>
+        <p className="max-w-2xl text-sm leading-7 text-mist/60">
+          If you need the fastest walkthrough for judging, the instant demo is always available from the main screen.
+        </p>
       </div>
 
       <div className="grid gap-4">

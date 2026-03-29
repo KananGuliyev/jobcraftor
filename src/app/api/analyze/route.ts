@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       console.warn("[JobCraftor][analyze] invalid content type:", contentType || "<missing>");
       return createErrorResponse(
         400,
-        "JobCraftor expected a JSON analysis request. Please refresh and try generating the plan again.",
+        "We couldn't read that request cleanly. Please refresh the page and try generating the plan again.",
         "ANALYZE_INVALID_REQUEST",
       );
     }
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     console.error("[JobCraftor][analyze] request failed:", error);
     return createErrorResponse(
       500,
-      "JobCraftor could not process that request. Please try again or refresh the sample/demo input.",
+      "We couldn't generate the plan right now. Please try again, refresh the page, or use the instant demo.",
       "ANALYZE_UNEXPECTED_ERROR",
     );
   }

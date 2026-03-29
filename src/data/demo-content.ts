@@ -31,7 +31,7 @@ Nice to have
 - Experience with Node.js, backend APIs, or databases
 - Experience deploying projects or working with CI/CD
 - Evidence of shipping products, hackathon work, or technical leadership`,
-  resumeFileName: "aria-kim-resume.txt",
+  resumeFileName: null,
   resumeText: `Aria Kim
 Computer Science student
 University of Washington | Class of 2027
@@ -233,7 +233,7 @@ export const demoResult: JobCraftorResult = {
 export const demoMeta: JobCraftorAnalysisMeta = {
   source: "demo",
   notice:
-    "Demo mode is showing a polished software engineering internship walkthrough so you can see the full product instantly and reliably.",
+    "Demo mode is showing a polished software engineering internship walkthrough with preloaded text inputs and precomputed results, so the full product stays fast and reliable on stage.",
   model: "contest-demo",
 };
 

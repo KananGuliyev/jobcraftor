@@ -79,7 +79,7 @@ describe("isSupportedResumeUpload", () => {
     expect(isSupportedResumeUpload("resume.rtf")).toBe(true);
     expect(isSupportedResumeUpload("resume.pdf")).toBe(true);
     expect(isSupportedResumeUpload("resume.docx")).toBe(true);
-    expect(isSupportedResumeUpload("resume.doc")).toBe(true);
+    expect(isSupportedResumeUpload("resume.doc")).toBe(false);
   });
 
   it("rejects unsupported extensions", () => {

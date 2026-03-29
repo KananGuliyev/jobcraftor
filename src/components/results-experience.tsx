@@ -150,7 +150,7 @@ export function ResultsExperience({
           </h1>
           <p className="max-w-3xl text-sm leading-7 text-mist/68">
             {demoHighlights
-              ? `This instant sample walkthrough shows how JobCraftor turns a realistic ${demoHighlights.subtitle} into a focused, judge-ready application plan.`
+              ? `This instant sample walkthrough uses preloaded text inputs and precomputed results to show how JobCraftor turns a realistic ${demoHighlights.subtitle} into a focused, judge-ready application plan.`
               : "This is the main JobCraftor moment: scan the role, understand your fit, and leave with a concrete plan for what to do next."}
           </p>
         </div>

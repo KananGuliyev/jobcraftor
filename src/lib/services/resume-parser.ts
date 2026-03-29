@@ -43,7 +43,7 @@ function detectResumeFormat(file: File): ResumeUploadFormat {
 
   if (extension === ".doc") {
     throw new ResumeParseError(
-      "Legacy `.doc` files are not supported yet. Please upload a `.docx`, PDF, or paste the resume text.",
+      "Legacy `.doc` files are not supported here. For the safest result, paste your resume text or upload a `.docx` file.",
       415,
       "UPLOAD_UNSUPPORTED_FILE_TYPE",
     );
@@ -62,7 +62,7 @@ function detectResumeFormat(file: File): ResumeUploadFormat {
   }
 
   throw new ResumeParseError(
-    "Upload a supported resume file: `.txt`, `.md`, `.rtf`, `.pdf`, or `.docx`. You can also paste the resume text directly.",
+    "Please use a `.txt`, `.md`, `.rtf`, `.pdf`, or `.docx` resume file. For the safest demo, paste resume text or upload a `.docx` file.",
     415,
     "UPLOAD_UNSUPPORTED_FILE_TYPE",
   );
@@ -71,7 +71,7 @@ function detectResumeFormat(file: File): ResumeUploadFormat {
 function validateResumeFile(file: File) {
   if (!file.size) {
     throw new ResumeParseError(
-      "The uploaded file is empty. Please choose a resume with readable content.",
+      "That file looks empty. Try another export, paste your resume text, or upload a `.docx` version.",
       400,
       "UPLOAD_EMPTY_FILE",
     );
@@ -79,7 +79,7 @@ function validateResumeFile(file: File) {
 
   if (file.size > MAX_RESUME_BYTES) {
     throw new ResumeParseError(
-      "The uploaded file is too large. Please use a resume under 5 MB or paste the text directly.",
+      "That file is too large to parse cleanly here. Please use a resume under 5 MB or paste the text directly.",
       413,
       "UPLOAD_FILE_TOO_LARGE",
     );
@@ -148,23 +148,23 @@ function getMeta(format: ResumeUploadFormat, fileName: string): ParseResumeSucce
   const labels: Record<ResumeUploadFormat, { sourceLabel: string; helperText: string }> = {
     txt: {
       sourceLabel: "Parsed text resume",
-      helperText: "Text resume parsed successfully. Review the extracted text below and edit it if needed.",
+      helperText: "Text resume loaded successfully. Review the extracted text below and edit it if needed.",
     },
     md: {
       sourceLabel: "Parsed markdown resume",
-      helperText: "Markdown resume parsed successfully. Review the extracted text below and edit it if needed.",
+      helperText: "Markdown resume loaded successfully. Review the extracted text below and edit it if needed.",
     },
     rtf: {
       sourceLabel: "Parsed RTF resume",
-      helperText: "RTF resume parsed successfully. Review the extracted text below and edit it if needed.",
+      helperText: "RTF resume loaded successfully. Review the extracted text below and edit it if needed.",
     },
     pdf: {
       sourceLabel: "Parsed PDF resume",
-      helperText: "PDF text was extracted and normalized. Review the text below before generating the plan.",
+      helperText: "PDF text was extracted. Review it carefully before generating the plan, since some PDF exports can be inconsistent.",
     },
     docx: {
       sourceLabel: "Parsed DOCX resume",
-      helperText: "DOCX content was extracted and normalized. Review the text below before generating the plan.",
+      helperText: "DOCX content was extracted cleanly. Review the text below before generating the plan.",
     },
   };
 
@@ -187,8 +187,15 @@ export async function parseResumeFile(file: File): Promise<ParseResumeSuccess> {
   try {
     extractedText = await extractResumeText(format, buffer);
   } catch {
+    const parseFailureMessage =
+      format === "pdf"
+        ? "We couldn't read that PDF cleanly. For the safest demo, paste your resume text or try a `.docx` export instead."
+        : format === "docx"
+          ? "We couldn't read that DOCX file cleanly. Try another export or paste your resume text directly."
+          : `JobCraftor couldn't read this ${format.toUpperCase()} file. Please try a cleaner export or paste the resume text directly.`;
+
     throw new ResumeParseError(
-      `JobCraftor could not read this ${format.toUpperCase()} file. Please try a cleaner export, a different format, or paste the resume text directly.`,
+      parseFailureMessage,
       422,
       "UPLOAD_PARSE_ERROR",
     );
@@ -197,8 +204,13 @@ export async function parseResumeFile(file: File): Promise<ParseResumeSuccess> {
   const text = normalizeResumeText(extractedText);
 
   if (!text) {
+    const noTextMessage =
+      format === "pdf"
+        ? "That PDF did not contain enough readable text. For the safest demo, paste your resume text or upload a `.docx` file."
+        : "We couldn't find enough readable text in that file. Try another export or paste the resume text directly.";
+
     throw new ResumeParseError(
-      "JobCraftor could not extract readable text from that file. Try another export, copy the resume into plain text, or paste it directly.",
+      noTextMessage,
       422,
       "UPLOAD_NO_READABLE_TEXT",
     );

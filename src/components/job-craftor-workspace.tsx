@@ -44,7 +44,50 @@ import { SectionHeading } from "./section-heading";
 
 export function JobCraftorWorkspace() {
   const genericRequestError =
-    "We couldn't process that file or request. Please try again, use a different file export, or paste your resume text directly.";
+    "We couldn't prepare that file right now. Please try another export, use a `.docx` file, or paste your resume text directly.";
+
+  function getFriendlyUploadErrorMessage(error: unknown) {
+    if (error instanceof JobCraftorApiError) {
+      switch (error.code) {
+        case "UPLOAD_UNSUPPORTED_FILE_TYPE":
+          return "That file type is not supported here. For the safest demo, paste your resume text or upload a `.docx` file.";
+        case "UPLOAD_EMPTY_FILE":
+          return "That file looks empty. Try another export, paste your resume text, or upload a `.docx` version.";
+        case "UPLOAD_PARSE_ERROR":
+        case "UPLOAD_NO_READABLE_TEXT":
+          return "We couldn't turn that file into clean resume text. For the safest demo, paste your resume text or try a `.docx` export.";
+        case "UPLOAD_FILE_TOO_LARGE":
+          return "That file is too large to read cleanly here. Please paste your resume text or use a smaller `.docx` or text export.";
+        default:
+          return error.message || genericRequestError;
+      }
+    }
+
+    if (error instanceof Error && error.message) {
+      return error.message;
+    }
+
+    return genericRequestError;
+  }
+
+  function getFriendlyAnalyzeErrorMessage(error: unknown) {
+    if (error instanceof JobCraftorApiError) {
+      switch (error.code) {
+        case "ANALYZE_VALIDATION_ERROR":
+          return "Add a job posting and resume text, then try generating the plan again.";
+        case "ANALYZE_INVALID_REQUEST":
+          return "We couldn't read that request cleanly. Please refresh the page and try again.";
+        default:
+          return error.message || "We couldn't generate the plan right now. Please try again or use the instant demo.";
+      }
+    }
+
+    if (error instanceof Error && error.message) {
+      return error.message;
+    }
+
+    return "We couldn't generate the plan right now. Please try again or use the instant demo.";
+  }
   const [formValues, setFormValues] = useState<WorkspaceFormValues>(emptyWorkspaceFormValues);
   const [uploadState, setUploadState] = useState<WorkspaceUploadState>(defaultWorkspaceUploadState);
   const [fieldErrors, setFieldErrors] = useState<WorkspaceFieldErrors>({});
@@ -86,8 +129,8 @@ export function JobCraftorWorkspace() {
     setUploadState(
       buildSampleUploadState(
         demoInput.resumeFileName ?? null,
-        "Sample dataset",
-        "Sample software engineering internship inputs are loaded. Generate the plan or launch the instant demo for the fastest walkthrough.",
+        "Sample pasted resume",
+        "Sample software engineering internship inputs are loaded with pasted resume text. Generate the plan or use the instant demo for the fastest walkthrough.",
       ),
     );
     setFieldErrors({});
@@ -113,8 +156,8 @@ export function JobCraftorWorkspace() {
     setUploadState(
       buildSampleUploadState(
         demoInput.resumeFileName ?? null,
-        "Instant demo dataset",
-        "This sample software engineering internship package is ready to explore immediately.",
+        "Instant demo package",
+        "This sample software engineering internship walkthrough is ready to explore immediately with pasted resume text and precomputed results.",
       ),
     );
     setFieldErrors({});
@@ -149,7 +192,7 @@ export function JobCraftorWorkspace() {
     setTelemetryEvents(
       recordJobCraftorLocalEvent(
         "generate_plan_clicked",
-        `Generate Plan clicked with ${formValues.jobPostingText.trim() ? "job text" : "job URL"} and ${formValues.resumeText.trim() ? "resume text" : "resume upload"}.`,
+        `Generate Plan clicked with ${formValues.jobPostingText.trim() ? "job text" : "job URL"} and ${formValues.resumeText.trim() ? "pasted resume text" : "resume upload"}.`,
       ),
     );
 
@@ -184,7 +227,7 @@ export function JobCraftorWorkspace() {
         response,
         schema: jobCraftorAnalysisResponseSchema,
         endpoint: "/api/analyze",
-        fallbackMessage: "We couldn't generate your plan right now. Please try again or refresh the sample/demo input.",
+        fallbackMessage: "We couldn't generate the plan right now. Please try again, refresh the page, or use the instant demo.",
       });
 
       setHistoryEntries(saveJobCraftorLocalAnalysis(payload, body.result, body.meta));
@@ -194,10 +237,7 @@ export function JobCraftorWorkspace() {
         setAnalysisMeta(body.meta ?? null);
       });
     } catch (caughtError) {
-      const message =
-        caughtError instanceof JobCraftorApiError || caughtError instanceof Error
-          ? caughtError.message
-          : "We couldn't process that request. Please try again or refresh the sample/demo input.";
+      const message = getFriendlyAnalyzeErrorMessage(caughtError);
       setTelemetryEvents(recordJobCraftorLocalEvent("analysis_failed", message));
       setSubmissionError(message);
     } finally {
@@ -244,15 +284,12 @@ export function JobCraftorWorkspace() {
       setFieldErrors((current) => ({ ...current, resumeText: undefined }));
       setSubmissionError(null);
     } catch (caughtError) {
-      const message =
-        caughtError instanceof JobCraftorApiError || caughtError instanceof Error
-          ? caughtError.message
-          : genericRequestError;
+      const message = getFriendlyUploadErrorMessage(caughtError);
       setTelemetryEvents(recordJobCraftorLocalEvent("parsing_failed", message));
       setSubmissionError(message);
       setFieldErrors((current) => ({
         ...current,
-        resumeText: "Upload a readable file or paste your resume directly.",
+        resumeText: "Paste your resume text directly, or try again with a `.docx` file.",
       }));
     } finally {
       setIsUploading(false);
@@ -294,7 +331,7 @@ export function JobCraftorWorkspace() {
       <div className="landing-shell">
         {activeView === "workspace" ? (
           <>
-            <Hero onPrimaryCta={scrollToWorkflow} onSecondaryCta={handleTryDemo} />
+            <Hero onPrimaryCta={handleTryDemo} onSecondaryCta={scrollToWorkflow} />
 
             <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
               <div className="space-y-6">
@@ -303,7 +340,7 @@ export function JobCraftorWorkspace() {
                     <SectionHeading
                       eyebrow="Start here"
                       title={`${completion}% complete`}
-                      description="Add the posting and your resume, then generate a focused dashboard with fit, blockers, resume upgrades, and next steps."
+                      description="Add the posting and your resume, then generate a focused dashboard with fit, blockers, resume upgrades, and next steps. For the safest manual flow, paste your resume text or use a DOCX file."
                     />
                     <div className="w-full max-w-xs space-y-3">
                       <div className="h-3 overflow-hidden rounded-full bg-white/10">
@@ -318,7 +355,7 @@ export function JobCraftorWorkspace() {
                         <span>Plan</span>
                       </div>
                       <p className="text-xs leading-6 text-mist/58">
-                        Fastest path for judges: use the instant demo from the top of the page.
+                        Fastest path for judges: use the instant demo. Safest custom path: paste resume text or upload a DOCX file.
                       </p>
                       {result ? (
                         <button type="button" onClick={() => setActiveView("results")} className="button-secondary w-full">
