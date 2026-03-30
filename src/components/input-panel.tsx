@@ -206,7 +206,7 @@ export function InputPanel({
             <input
               id={inputId}
               type="file"
-              accept=".txt,.md,.rtf,.pdf,.doc,.docx,text/plain,text/markdown,application/rtf,text/rtf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              accept=".txt,.md,.rtf,.pdf,.docx,text/plain,text/markdown,application/rtf,text/rtf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               className="hidden"
               onChange={(event) => {
                 const file = event.target.files?.[0];

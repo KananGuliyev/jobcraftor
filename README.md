@@ -101,7 +101,7 @@ Available environment variables:
 | `OPENAI_MODEL` | No | Optional model override. Defaults to `gpt-4o-mini`. |
 
 Important:
-- `.env.local` should live at the repository root: [JobCraftor](C:\Users\kenan\OneDrive\İş masası\JobCraftor)
+- `.env.local` should live at the repository root: `C:\Users\kenan\OneDrive\İş masası\JobCraftor`
 - after adding or changing `OPENAI_API_KEY` or `OPENAI_MODEL`, restart `npm run dev`
 - `OPENAI_MODEL` is optional; if omitted, JobCraftor uses `gpt-4o-mini`
 
@@ -172,6 +172,42 @@ This makes the core product value visible immediately and avoids depending on li
 Vercel is the best deployment target for this app. It fits the Next.js architecture naturally, supports the server routes cleanly, and is the fastest path to a polished hosted demo.
 
 Key production notes:
+- The homepage already exists at `src/app/page.tsx`
+- The App Router layout already exists at `src/app/layout.tsx`
 - The AI and resume parsing routes run on the Node runtime
 - The app is deployable even without `OPENAI_API_KEY` because the fallback engine preserves the experience
 - Browser-local history and diagnostics are intentionally local-only for this MVP
+
+### Vercel deployment checklist
+
+- Use Node.js `20.11+`
+- Keep the Framework Preset as `Next.js`
+- Keep the Root Directory at the repository root or leave it blank
+- Keep the Production Branch as `main`
+- Keep the Output Directory blank/default for Next.js
+- Set `OPENAI_API_KEY` in Vercel if you want live AI analysis
+- Optionally set `OPENAI_MODEL` if you want to override the default `gpt-4o-mini`
+- Verify `npm run build` passes before deploying
+- Expect browser-local history and diagnostics to remain device-local by design
+
+### Exact Vercel steps
+
+1. Push the repo to GitHub
+2. In Vercel, click `Add New...` -> `Project`
+3. Import the `jobcraftor` repository
+4. Keep the detected framework preset as `Next.js`
+5. Make sure `Root Directory` is the repo root or blank, not `src`, `docs`, or another subfolder
+6. Make sure `Production Branch` is `main`
+7. Leave `Output Directory` blank so Vercel uses the normal Next.js output
+8. Keep the build command as `npm run build`
+9. In `Environment Variables`, add:
+   - `OPENAI_API_KEY` = your real OpenAI key if you want live AI
+   - `OPENAI_MODEL` = optional override
+10. Deploy
+11. If the deployed root path still returns `404 NOT_FOUND`, re-check the Vercel project settings above before changing app code, because the App Router homepage already exists in the repo
+12. After deployment, verify:
+   - the landing page loads at `/`
+   - `Launch instant demo` works
+   - `Generate plan` works
+   - `/api/analyze` returns live AI results when `OPENAI_API_KEY` is set, otherwise validated fallback results
+   - `/api/parse-resume` works with a supported upload such as `.docx` or `.txt`
