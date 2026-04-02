@@ -78,11 +78,20 @@ body {
 }
 
 .field-area {
-  @apply min-h-[220px] w-full rounded-[22px] border border-white/10 bg-ink/75 px-5 py-4 text-[15px] leading-7 text-sand outline-none transition duration-200;
+  @apply min-h-[220px] min-w-0 w-full rounded-[22px] border border-white/10 bg-ink/75 px-5 py-4 text-[15px] leading-7 text-sand outline-none transition duration-200;
 }
 
 .field-input {
-  @apply w-full rounded-[18px] border border-white/10 bg-ink/75 px-4 py-3 text-[15px] text-sand outline-none transition duration-200;
+  @apply min-w-0 w-full rounded-[18px] border border-white/10 bg-ink/75 px-4 py-3 text-[15px] text-sand outline-none transition duration-200;
+}
+
+.field-input-date {
+  @apply min-h-[50px] pr-3;
+}
+
+.field-input-date::-webkit-calendar-picker-indicator {
+  filter: invert(0.92) saturate(0) brightness(1.08);
+  opacity: 0.9;
 }
 
 .field-input-error {

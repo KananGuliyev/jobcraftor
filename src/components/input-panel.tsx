@@ -26,6 +26,10 @@ function fieldClass(hasError: boolean) {
   return hasError ? "field-input field-input-error" : "field-input";
 }
 
+function dateFieldClass(hasError: boolean) {
+  return hasError ? "field-input field-input-date field-input-error" : "field-input field-input-date";
+}
+
 function areaClass(hasError: boolean) {
   return hasError ? "field-area field-input-error" : "field-area";
 }
@@ -98,8 +102,8 @@ export function InputPanel({
             />
           </label>
 
-          <div className="grid gap-5">
-            <label className="grid gap-3">
+          <div className="grid gap-5 min-[980px]:grid-rows-[auto_1fr]">
+            <label className="grid min-w-0 gap-3">
               <span className="text-sm font-semibold text-sand">Job posting URL</span>
               <input
                 type="url"
@@ -114,8 +118,8 @@ export function InputPanel({
               />
             </label>
 
-            <div className="grid gap-5 sm:grid-cols-2">
-              <label className="grid gap-3">
+            <div className="grid gap-5 md:grid-cols-[minmax(0,1.18fr)_minmax(214px,0.82fr)] md:items-start">
+              <label className="grid min-w-0 gap-3">
                 <span className="text-sm font-semibold text-sand">Target role</span>
                 <input
                   type="text"
@@ -130,13 +134,13 @@ export function InputPanel({
                 />
               </label>
 
-              <label className="grid gap-3">
+              <label className="grid min-w-0 gap-3">
                 <span className="text-sm font-semibold text-sand">Application deadline</span>
                 <input
                   type="date"
                   value={values.deadline}
                   onChange={(event) => onChange("deadline", event.target.value)}
-                  className={fieldClass(Boolean(fieldErrors.deadline))}
+                  className={dateFieldClass(Boolean(fieldErrors.deadline))}
                 />
                 <FieldMessage
                   error={fieldErrors.deadline}
