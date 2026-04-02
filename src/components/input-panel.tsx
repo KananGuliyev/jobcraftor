@@ -52,6 +52,10 @@ export function InputPanel({
   onUpload,
 }: InputPanelProps) {
   const inputId = useId();
+  const fieldBaseId = useId();
+  const jobPostingUrlId = `${fieldBaseId}-job-posting-url`;
+  const targetRoleId = `${fieldBaseId}-target-role`;
+  const deadlineId = `${fieldBaseId}-deadline`;
   const [isDragging, setIsDragging] = useState(false);
 
   function handleDrop(event: DragEvent<HTMLLabelElement>) {
@@ -102,10 +106,13 @@ export function InputPanel({
             />
           </label>
 
-          <div className="grid gap-5 min-[980px]:grid-rows-[auto_1fr]">
-            <label className="grid min-w-0 gap-3">
-              <span className="text-sm font-semibold text-sand">Job posting URL</span>
+          <div className="grid gap-5">
+            <div className="field-stack min-w-0">
+              <label htmlFor={jobPostingUrlId} className="text-sm font-semibold text-sand">
+                Job posting URL
+              </label>
               <input
+                id={jobPostingUrlId}
                 type="url"
                 value={values.jobPostingUrl}
                 onChange={(event) => onChange("jobPostingUrl", event.target.value)}
@@ -116,12 +123,15 @@ export function InputPanel({
                 error={fieldErrors.jobPostingUrl}
                 help="Optional. Use this if you want JobCraftor to keep company context attached to the role."
               />
-            </label>
+            </div>
 
-            <div className="grid gap-5 md:grid-cols-[minmax(0,1.18fr)_minmax(214px,0.82fr)] md:items-start">
-              <label className="grid min-w-0 gap-3">
-                <span className="text-sm font-semibold text-sand">Target role</span>
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.18fr)_minmax(240px,0.82fr)] xl:items-start">
+              <div className="field-stack min-w-0">
+                <label htmlFor={targetRoleId} className="text-sm font-semibold text-sand">
+                  Target role
+                </label>
                 <input
+                  id={targetRoleId}
                   type="text"
                   value={values.targetRole}
                   onChange={(event) => onChange("targetRole", event.target.value)}
@@ -132,11 +142,14 @@ export function InputPanel({
                   error={fieldErrors.targetRole}
                   help="Optional. Helpful if the posting title is vague or you want the output framed more directly."
                 />
-              </label>
+              </div>
 
-              <label className="grid min-w-0 gap-3">
-                <span className="text-sm font-semibold text-sand">Application deadline</span>
+              <div className="field-stack min-w-0 xl:max-w-[280px]">
+                <label htmlFor={deadlineId} className="text-sm font-semibold text-sand">
+                  Application deadline
+                </label>
                 <input
+                  id={deadlineId}
                   type="date"
                   value={values.deadline}
                   onChange={(event) => onChange("deadline", event.target.value)}
@@ -146,7 +159,7 @@ export function InputPanel({
                   error={fieldErrors.deadline}
                   help="Optional. Adds timing cues to the plan and helps prioritize what to do first."
                 />
-              </label>
+              </div>
             </div>
           </div>
         </div>

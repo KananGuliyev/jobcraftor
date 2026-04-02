@@ -77,6 +77,10 @@ body {
   color: rgb(220 230 242 / 0.68);
 }
 
+.field-stack {
+  @apply grid gap-3;
+}
+
 .field-area {
   @apply min-h-[220px] min-w-0 w-full rounded-[22px] border border-white/10 bg-ink/75 px-5 py-4 text-[15px] leading-7 text-sand outline-none transition duration-200;
 }
