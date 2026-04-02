@@ -54,8 +54,9 @@ export function InputPanel({
   const inputId = useId();
   const fieldBaseId = useId();
   const jobPostingUrlId = `${fieldBaseId}-job-posting-url`;
-  const targetRoleId = `${fieldBaseId}-target-role`;
   const deadlineId = `${fieldBaseId}-deadline`;
+  const targetRoleId = `${fieldBaseId}-target-role`;
+  const resumeTextId = `${fieldBaseId}-resume-text`;
   const [isDragging, setIsDragging] = useState(false);
 
   function handleDrop(event: DragEvent<HTMLLabelElement>) {
@@ -125,7 +126,24 @@ export function InputPanel({
               />
             </div>
 
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.18fr)_minmax(240px,0.82fr)] xl:items-start">
+            <div className="grid gap-5">
+              <div className="field-stack min-w-0">
+                <label htmlFor={deadlineId} className="text-sm font-semibold text-sand">
+                  Application deadline
+                </label>
+                <input
+                  id={deadlineId}
+                  type="date"
+                  value={values.deadline}
+                  onChange={(event) => onChange("deadline", event.target.value)}
+                  className={dateFieldClass(Boolean(fieldErrors.deadline))}
+                />
+                <FieldMessage
+                  error={fieldErrors.deadline}
+                  help="Optional. Adds timing cues to the plan and helps prioritize what to do first."
+                />
+              </div>
+
               <div className="field-stack min-w-0">
                 <label htmlFor={targetRoleId} className="text-sm font-semibold text-sand">
                   Target role
@@ -143,28 +161,11 @@ export function InputPanel({
                   help="Optional. Helpful if the posting title is vague or you want the output framed more directly."
                 />
               </div>
-
-              <div className="field-stack min-w-0 xl:max-w-[280px]">
-                <label htmlFor={deadlineId} className="text-sm font-semibold text-sand">
-                  Application deadline
-                </label>
-                <input
-                  id={deadlineId}
-                  type="date"
-                  value={values.deadline}
-                  onChange={(event) => onChange("deadline", event.target.value)}
-                  className={dateFieldClass(Boolean(fieldErrors.deadline))}
-                />
-                <FieldMessage
-                  error={fieldErrors.deadline}
-                  help="Optional. Adds timing cues to the plan and helps prioritize what to do first."
-                />
-              </div>
             </div>
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[0.88fr_1.12fr]">
+        <div className="grid gap-6 lg:grid-cols-[0.88fr_1.12fr] lg:items-start">
           <div className="grid gap-3">
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold text-sand">Resume file (optional)</span>
@@ -235,9 +236,12 @@ export function InputPanel({
             />
           </div>
 
-          <label className="grid gap-3">
-            <span className="text-sm font-semibold text-sand">Resume text (recommended)</span>
+          <div className="field-stack self-start">
+            <label htmlFor={resumeTextId} className="text-sm font-semibold text-sand">
+              Resume text (recommended)
+            </label>
             <textarea
+              id={resumeTextId}
               value={values.resumeText}
               onChange={(event) => onChange("resumeText", event.target.value)}
               className={areaClass(Boolean(fieldErrors.resumeText))}
@@ -247,7 +251,7 @@ export function InputPanel({
               error={fieldErrors.resumeText}
               help="Recommended for live demos: paste your resume text here. If you upload a file, review and edit the extracted text before generating the plan."
             />
-          </label>
+          </div>
         </div>
 
         {submissionError ? (
