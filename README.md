@@ -54,6 +54,7 @@ JobCraftor is designed to be easy to demo and easy to use:
 - Export and share actions for key outputs
 - Lightweight saved history in the browser
 - Lightweight internal diagnostics for demo/debug confidence
+- Real Open Graph and Twitter preview image for shareable links
 
 ## Tech Stack
 
@@ -99,11 +100,13 @@ Available environment variables:
 | --- | --- | --- |
 | `OPENAI_API_KEY` | No | Enables live AI analysis. If missing, JobCraftor falls back to the validated mock engine. |
 | `OPENAI_MODEL` | No | Optional model override. Defaults to `gpt-4o-mini`. |
+| `NEXT_PUBLIC_SITE_URL` | No | Recommended in production. Used for absolute Open Graph and Twitter preview URLs. |
 
 Important:
-- `.env.local` should live at the repository root: `C:\Users\kenan\OneDrive\İş masası\JobCraftor`
+- `.env.local` should live at the repository root
 - after adding or changing `OPENAI_API_KEY` or `OPENAI_MODEL`, restart `npm run dev`
 - `OPENAI_MODEL` is optional; if omitted, JobCraftor uses `gpt-4o-mini`
+- `NEXT_PUBLIC_SITE_URL` should point to your deployed URL in production, for example `https://jobcraftor.vercel.app`
 
 ### Run locally
 
@@ -158,6 +161,31 @@ With one click, a judge can open:
 
 This makes the core product value visible immediately and avoids depending on live generation during a contest demo.
 
+## Social Preview Setup
+
+JobCraftor includes a static social preview image at:
+
+`/og/jobcraftor-preview.png`
+
+To expose clean absolute preview URLs in production:
+
+1. Set `NEXT_PUBLIC_SITE_URL` in `.env.local` for local testing if needed
+2. Set `NEXT_PUBLIC_SITE_URL` in Vercel to your public deployment URL, for example `https://jobcraftor.vercel.app`
+3. Redeploy after adding or changing that value
+
+How to verify:
+
+1. Open `/og/jobcraftor-preview.png` directly in the browser
+2. Inspect the homepage metadata and confirm it includes:
+   - `og:title`
+   - `og:description`
+   - `og:image`
+   - `twitter:card`
+   - `twitter:image`
+3. Test the deployed URL in a social preview validator or share debugger
+
+Note: social platforms often cache link previews aggressively, so an older card may persist until their cache refreshes.
+
 ## Future Improvements
 
 - Save analysis history across devices with authenticated accounts
@@ -187,6 +215,7 @@ Key production notes:
 - Keep the Output Directory blank/default for Next.js
 - Set `OPENAI_API_KEY` in Vercel if you want live AI analysis
 - Optionally set `OPENAI_MODEL` if you want to override the default `gpt-4o-mini`
+- Set `NEXT_PUBLIC_SITE_URL` to your public deployment URL for correct social preview metadata
 - Verify `npm run build` passes before deploying
 - Expect browser-local history and diagnostics to remain device-local by design
 
@@ -203,6 +232,7 @@ Key production notes:
 9. In `Environment Variables`, add:
    - `OPENAI_API_KEY` = your real OpenAI key if you want live AI
    - `OPENAI_MODEL` = optional override
+   - `NEXT_PUBLIC_SITE_URL` = your public deployment URL, for example `https://jobcraftor.vercel.app`
 10. Deploy
 11. If the deployed root path still returns `404 NOT_FOUND`, re-check the Vercel project settings above before changing app code, because the App Router homepage already exists in the repo
 12. After deployment, verify:
@@ -211,3 +241,4 @@ Key production notes:
    - `Generate plan` works
    - `/api/analyze` returns live AI results when `OPENAI_API_KEY` is set, otherwise validated fallback results
    - `/api/parse-resume` works with a supported upload such as `.docx` or `.txt`
+   - `/og/jobcraftor-preview.png` loads directly and social previews use the branded card image

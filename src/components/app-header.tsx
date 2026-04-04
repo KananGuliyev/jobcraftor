@@ -1,14 +1,23 @@
+import Image from "next/image";
+
 export function AppHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-white/10 bg-ink/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-[1380px] items-center justify-between px-4 py-4 sm:px-6 xl:px-8">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-sunrise/20 bg-sunrise text-sm font-semibold text-slate-950 shadow-[0_10px_24px_rgba(246,165,79,0.18)]">
-            JC
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/jobcraftor-logo.png"
+              alt="JobCraftor logo"
+              width={512}
+              height={512}
+              priority
+              className="h-11 w-11 shrink-0 rounded-[14px] object-contain shadow-[0_12px_26px_rgba(8,12,22,0.28)] sm:h-12 sm:w-12"
+            />
           </div>
-          <div>
-            <p className="font-display text-lg font-semibold text-sand">JobCraftor</p>
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-mist/55">
+          <div className="min-w-0">
+            <p className="truncate font-display text-lg font-semibold text-sand">JobCraftor</p>
+            <p className="hidden text-[11px] font-medium uppercase tracking-[0.22em] text-mist/55 sm:block">
               Turn postings into application plans
             </p>
           </div>
