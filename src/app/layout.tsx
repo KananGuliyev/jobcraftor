@@ -9,10 +9,10 @@ const manrope = Manrope({
   display: "swap",
 });
 
-const siteTitle = "JobCraftor | Turn a job posting into a 7-day execution plan";
+const siteTitle = "JobCraftor";
 const siteDescription =
-  "JobCraftor helps students compare a job or internship posting against their resume and turn the gap into a personalized action plan.";
-const socialImagePath = "/og/jobcraftor-preview.png";
+  "Compare a job posting against a resume and turn the gap into a clear, personalized application plan.";
+const socialImagePath = "/og-image.png";
 
 function resolveMetadataBase() {
   const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
